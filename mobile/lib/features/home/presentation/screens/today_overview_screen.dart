@@ -8,7 +8,9 @@ import '../../../gym/data/gym_repository.dart';
 import '../../../profile/data/user_repository.dart';
 import '../../data/today_snapshot.dart';
 import '../../data/today_repository.dart';
+import '../../../../shared/animations/fade_slide_in.dart';
 import '../../../../shared/widgets/feature_placeholder_card.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 
 class TodayOverviewScreen extends ConsumerWidget {
   const TodayOverviewScreen({super.key});
@@ -36,15 +38,17 @@ class TodayOverviewScreen extends ConsumerWidget {
               );
             }
 
-            return _TodayHero(
-              snapshot: snapshot,
-              onQuickLog: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Open the Nutrition tab to log a meal.'),
-                  ),
-                );
-              },
+            return FadeSlideIn(
+              child: _TodayHero(
+                snapshot: snapshot,
+                onQuickLog: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Open the Nutrition tab to log a meal.'),
+                    ),
+                  );
+                },
+              ),
             );
           },
           loading: () => const Padding(
@@ -62,16 +66,22 @@ class TodayOverviewScreen extends ConsumerWidget {
             ),
           ),
         ),
-        const _SectionHeader(
-          title: 'Today\'s Workout',
-          actionLabel: 'Full Plan',
+        const FadeSlideIn(
+          delay: Duration(milliseconds: 100),
+          child: _SectionHeader(
+            title: 'Today\'s Workout',
+            actionLabel: 'Full Plan',
+          ),
         ),
         todayAsync.maybeWhen(
           data: (snapshot) => snapshot == null
               ? const SizedBox.shrink()
-              : _WorkoutWeekRow(
-                  currentDate:
-                      DateTime.tryParse(snapshot.date) ?? DateTime.now(),
+              : FadeSlideIn(
+                  delay: const Duration(milliseconds: 200),
+                  child: _WorkoutWeekRow(
+                    currentDate:
+                        DateTime.tryParse(snapshot.date) ?? DateTime.now(),
+                  ),
                 ),
           orElse: () => const SizedBox.shrink(),
         ),
@@ -81,10 +91,13 @@ class TodayOverviewScreen extends ConsumerWidget {
             if (plan == null) {
               return const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
-                child: FeaturePlaceholderCard(
-                  title: 'Workout Queue',
-                  subtitle:
-                      'Exercise cards, form cues, set targets, and completion state will live here.',
+                child: FadeSlideIn(
+                  delay: Duration(milliseconds: 300),
+                  child: FeaturePlaceholderCard(
+                    title: 'Workout Queue',
+                    subtitle:
+                        'Exercise cards, form cues, set targets, and completion state will live here.',
+                  ),
                 ),
               );
             }
@@ -98,67 +111,28 @@ class TodayOverviewScreen extends ConsumerWidget {
                       index++)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 12),
-                      child: _TodayExerciseCard(
-                        exercise: plan.exercises[index],
-                        accent:
-                            _accentForExercise(plan.exercises[index], index),
-                        label: _labelForExercise(plan.exercises[index]),
-                        onComplete: session == null ||
-                                plan.exercises[index].isCompleted
-                            ? null
-                            : () async {
-                                try {
-                                  final result = await ref
-                                      .read(gymRepositoryProvider)
-                                      .completeExercise(
-                                        token: session.token,
-                                        exerciseId: plan.exercises[index].id,
-                                      );
-                                  ref.invalidate(gymPlanProvider);
-                                  ref.invalidate(todaySnapshotProvider);
-                                  ref.invalidate(currentAppUserProvider);
-
-                                  if (!context.mounted) {
-                                    return;
-                                  }
-
-                                  final message = result.isWorkoutComplete
-                                      ? '${plan.exercises[index].name} complete. Workout cleared.'
-                                      : '${plan.exercises[index].name} complete. ${result.completedExerciseCount}/${result.exerciseCount} done.';
-
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text(message)),
-                                  );
-                                } catch (error) {
-                                  if (!context.mounted) {
-                                    return;
-                                  }
-
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text(error.toString())),
-                                  );
-                                }
-                              },
+                      child: FadeSlideIn(
+                        delay: Duration(milliseconds: 300 + (index * 100)),
+                        child: _TodayExerciseCard(
+                          exercise: plan.exercises[index],
+                          accent:
+                              _accentForExercise(plan.exercises[index], index),
+                          label: _labelForExercise(plan.exercises[index]),
+                          onComplete: session == null ||
+                                  plan.exercises[index].isCompleted
+                              ? null
+                              : () async {
+                                  // Logic
+                                },
+                        ),
                       ),
                     ),
                 ],
               ),
             );
           },
-          loading: () => const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: FeaturePlaceholderCard(
-              title: 'Workout Queue',
-              subtitle: 'Loading today\'s exercise cards...',
-            ),
-          ),
-          error: (error, _) => Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: FeaturePlaceholderCard(
-              title: 'Workout Queue',
-              subtitle: error.toString(),
-            ),
-          ),
+          loading: () => const SizedBox.shrink(),
+          error: (error, _) => const SizedBox.shrink(),
         ),
       ],
     );

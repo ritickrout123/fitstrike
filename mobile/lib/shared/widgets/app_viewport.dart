@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../config/theme.dart';
+import '../animations/floating_label_service.dart';
 
 class AppViewport extends StatelessWidget {
   const AppViewport({
@@ -94,7 +95,7 @@ class AppViewport extends StatelessWidget {
                   ),
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 430),
-                    child: content,
+                    child: FloatingLabelLayer(child: content),
                   ),
                 ),
               ),

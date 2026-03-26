@@ -6,9 +6,15 @@ import '../../../../shared/widgets/feature_placeholder_card.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../home/data/today_repository.dart';
 import '../../../profile/data/user_repository.dart';
+import '../../../../shared/animations/fade_slide_in.dart';
+import '../../../../shared/animations/screen_shake.dart';
+import '../../../../shared/animations/capture_result_overlay.dart';
+import '../../../../shared/animations/level_up_overlay.dart';
+import '../../../../shared/animations/floating_label_service.dart';
+import '../../../../core/animations/animation_constants.dart';
 import '../../data/run_overview.dart';
 import '../../data/run_repository.dart';
-
+import '../../../home/data/today_repository.dart';
 class TerritoryRunScreen extends ConsumerWidget {
   const TerritoryRunScreen({super.key});
 
@@ -16,107 +22,162 @@ class TerritoryRunScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final runAsync = ref.watch(runOverviewProvider);
     final session = ref.watch(authControllerProvider).session;
+    final shakeKey = GlobalKey<ScreenShakeState>();
 
     return runAsync.when(
       data: (overview) {
         if (overview == null) {
           return ListView(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             children: [
-              FeaturePlaceholderCard(
-                title: 'Territory Run',
-                subtitle:
-                    'Run missions, live map metrics, and capture controls unlock after sign in.',
-                badge: 'Locked',
+              FadeSlideIn(
+                child: FeaturePlaceholderCard(
+                  title: 'Territory Run',
+                  subtitle:
+                      'Run missions, live map metrics, and capture controls unlock after sign in.',
+                  badge: 'Locked',
+                ),
               ),
             ],
           );
         }
 
-        return ListView(
-          padding: const EdgeInsets.only(bottom: 24),
-          children: [
-            _RunHero(
-              overview: overview,
-              onCapture: session == null
-                  ? null
-                  : () async {
-                      try {
-                        final result = await ref
-                            .read(runRepositoryProvider)
-                            .simulateCapture(token: session.token);
-                        ref.invalidate(runOverviewProvider);
-                        ref.invalidate(todaySnapshotProvider);
-                        ref.invalidate(currentAppUserProvider);
+        return ScreenShake(
+          key: shakeKey,
+          child: ListView(
+            padding: const EdgeInsets.only(bottom: 24),
+            children: [
+              FadeSlideIn(
+                duration: AppAnimations.slow,
+                child: _RunHero(
+                  overview: overview,
+                  onCapture: session == null
+                      ? null
+                      : () async {
+                          try {
+                            final result = await ref
+                                .read(runRepositoryProvider)
+                                .simulateCapture(token: session.token);
+                            
+                            // Trigger Effects
+                            shakeKey.currentState?.shake();
+                            
+                            ref.invalidate(runOverviewProvider);
+                            ref.invalidate(todaySnapshotProvider);
+                            ref.invalidate(currentAppUserProvider);
 
-                        if (!context.mounted) {
-                          return;
-                        }
+                            if (!context.mounted) return;
 
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Captured ${result.capturedArea} m². Total captures: ${result.territoryCaptures}.',
-                            ),
-                          ),
-                        );
-                      } catch (error) {
-                        if (!context.mounted) {
-                          return;
-                        }
+                            // Show Floating Labels
+                            final rb = context.findRenderObject() as RenderBox?;
+                            final center = rb != null 
+                                ? rb.localToGlobal(Offset(rb.size.width / 2, rb.size.height / 2))
+                                : const Offset(200, 400);
 
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(error.toString())),
-                        );
-                      }
-                    },
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
-              child: _SectionTitle(
-                title: 'Live Metrics',
-                actionLabel: '#${overview.globalRank} Global',
+                            ref.read(floatingLabelProvider.notifier).show(
+                              '+${result.capturedArea} m²', 
+                              AppColors.lime, 
+                              center.translate(0, -40),
+                            );
+
+                            // Show Result Overlay
+                            showDialog(
+                              context: context,
+                              barrierColor: Colors.black87,
+                              builder: (context) => CaptureResultOverlay(
+                                area: result.capturedArea.toDouble(),
+                                xp: (result.capturedArea * 2).toInt(),
+                                coins: (result.capturedArea / 10).toInt(),
+                                onDismiss: () {
+                                  Navigator.pop(context);
+                                  // Mock Level Up Chance
+                                  if (result.capturedArea > 80) {
+                                    showDialog(
+                                      context: context,
+                                      barrierDismissible: false,
+                                      builder: (context) => LevelUpOverlay(
+                                        level: 12,
+                                        onDismiss: () => Navigator.pop(context),
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
+                            );
+                          } catch (error) {
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(error.toString())),
+                            );
+                          }
+                        },
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              child: _RunMetricGrid(overview: overview),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-              child: _SectionTitle(
-                title: 'Map Overlay',
-                actionLabel: 'SIM LIVE',
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
+                child: FadeSlideIn(
+                  delay: const Duration(milliseconds: 100),
+                  child: _SectionTitle(
+                    title: 'Live Metrics',
+                    actionLabel: '#${overview.globalRank} Global',
+                  ),
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              child: _MapPanel(overview: overview),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-              child: _SectionTitle(
-                title: 'Daily Missions',
-                actionLabel: '+${overview.points} PTS',
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                child: FadeSlideIn(
+                  delay: const Duration(milliseconds: 200),
+                  child: _RunMetricGrid(overview: overview),
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              child: Column(
-                children: [
-                  for (final mission in overview.missions) ...[
-                    _MissionCard(mission: mission),
-                    const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+                child: FadeSlideIn(
+                  delay: const Duration(milliseconds: 300),
+                  child: _SectionTitle(
+                    title: 'Map Overlay',
+                    actionLabel: 'SIM LIVE',
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                child: FadeSlideIn(
+                  delay: const Duration(milliseconds: 400),
+                  child: _MapPanel(overview: overview),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+                child: FadeSlideIn(
+                  delay: const Duration(milliseconds: 500),
+                  child: _SectionTitle(
+                    title: 'Daily Missions',
+                    actionLabel: '+${overview.points} PTS',
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                child: Column(
+                  children: [
+                    for (int i = 0; i < overview.missions.length; i++) ...[
+                      FadeSlideIn(
+                        delay: Duration(milliseconds: 600 + (i * 100)),
+                        child: _MissionCard(mission: overview.missions[i]),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       },
       loading: () => ListView(
-        padding: EdgeInsets.all(16),
-        children: [
+        padding: const EdgeInsets.all(16),
+        children: const [
           FeaturePlaceholderCard(
             title: 'Territory Run',
             subtitle: 'Loading live run metrics and mission progress...',

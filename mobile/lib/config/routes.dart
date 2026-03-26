@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/animations/page_transitions.dart';
 import '../features/auth/presentation/controllers/auth_controller.dart';
 import '../features/auth/presentation/screens/bootstrap_screen.dart';
 import '../features/auth/presentation/screens/auth_screen.dart';
@@ -57,23 +58,38 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/login',
-        builder: (_, __) => const AuthScreen(),
+        pageBuilder: (context, state) => AppTransitions.slideUp(
+          key: state.pageKey,
+          child: const AuthScreen(),
+        ),
       ),
       GoRoute(
         path: '/app',
-        builder: (_, __) => const HomeShell(),
+        pageBuilder: (context, state) => AppTransitions.crossFadeScale(
+          key: state.pageKey,
+          child: const HomeShell(),
+        ),
       ),
       GoRoute(
         path: '/app/events',
-        builder: (_, __) => const EventsScreen(),
+        pageBuilder: (context, state) => AppTransitions.slideUp(
+          key: state.pageKey,
+          child: const EventsScreen(),
+        ),
       ),
       GoRoute(
         path: '/app/comms',
-        builder: (_, __) => const CommsScreen(),
+        pageBuilder: (context, state) => AppTransitions.slideUp(
+          key: state.pageKey,
+          child: const CommsScreen(),
+        ),
       ),
       GoRoute(
         path: '/app/leaderboard',
-        builder: (_, __) => const LeaderboardScreen(),
+        pageBuilder: (context, state) => AppTransitions.slideUp(
+          key: state.pageKey,
+          child: const LeaderboardScreen(),
+        ),
       ),
     ],
   );
