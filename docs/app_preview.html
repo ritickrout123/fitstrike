@@ -1,0 +1,4319 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FitStrike</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #080a10;
+            --bg2: #0d1018;
+            --card: #121620;
+            --card2: #181d28;
+            --border: rgba(255, 255, 255, 0.07);
+            --border2: rgba(255, 255, 255, 0.12);
+            --lime: #c8ff00;
+            --lime-dim: rgba(200, 255, 0, 0.10);
+            --lime-glow: rgba(200, 255, 0, 0.25);
+            --cyan: #00e5ff;
+            --cyan-dim: rgba(0, 229, 255, 0.10);
+            --amber: #ffb300;
+            --amber-dim: rgba(255, 179, 0, 0.10);
+            --rose: #ff3d71;
+            --rose-dim: rgba(255, 61, 113, 0.10);
+            --violet: #9b59ff;
+            --violet-dim: rgba(155, 89, 255, 0.10);
+            --text: #eef1fb;
+            --text2: #8a90aa;
+            --text3: #4a5068;
+            --BAR: 'Barlow Condensed', sans-serif;
+            --DM: 'DM Sans', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+            background: #000
+        }
+
+        body {
+            font-family: var(--DM);
+            -webkit-font-smoothing: antialiased;
+            color: var(--text)
+        }
+
+        #app {
+            max-width: 430px;
+            margin: 0 auto;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: var(--bg);
+            position: relative;
+        }
+
+        /* ─── HEADER ─── */
+        .hdr {
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 44px 20px 14px;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            z-index: 50;
+        }
+
+        .logo {
+            font-family: var(--BAR);
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            background: linear-gradient(120deg, #fff 0%, var(--lime) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--lime-dim);
+            border: 1px solid rgba(200, 255, 0, 0.22);
+            border-radius: 6px;
+            padding: 4px 10px;
+            margin-left: 8px;
+            font-family: var(--BAR);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: var(--lime);
+            vertical-align: middle;
+        }
+
+        .hdr-right {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .streak-chip {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--amber-dim);
+            border: 1px solid rgba(255, 179, 0, 0.2);
+            border-radius: 20px;
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+
+        .streak-chip span {
+            font-family: var(--BAR);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--amber);
+            letter-spacing: .5px
+        }
+
+        .avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--violet), var(--cyan));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--BAR);
+            font-size: 13px;
+            font-weight: 800;
+            color: #fff;
+            border: 2px solid rgba(155, 89, 255, 0.4);
+            flex-shrink: 0;
+        }
+
+        /* ─── TOP NAV ─── */
+        .tnav {
+            flex-shrink: 0;
+            display: flex;
+            padding: 10px 16px 8px;
+            gap: 4px;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tn {
+            flex: 1;
+            text-align: center;
+            padding: 8px 2px;
+            font-family: var(--BAR);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--text3);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all .2s;
+            text-transform: uppercase;
+        }
+
+        .tn.active {
+            background: var(--lime);
+            color: #000;
+        }
+
+        .tn.active span {
+            color: #000
+        }
+
+        /* ─── SCREENS ─── */
+        .screens {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: none
+        }
+
+        .screens::-webkit-scrollbar {
+            display: none
+        }
+
+        .screen {
+            display: none;
+            animation: fadeUp .22s ease forwards
+        }
+
+        .screen.active {
+            display: block
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        /* ─── BOTTOM NAV ─── */
+        .bnav {
+            flex-shrink: 0;
+            display: flex;
+            background: rgba(8, 10, 16, .98);
+            border-top: 1px solid var(--border2);
+            padding: 10px 6px 22px;
+            position: relative;
+            z-index: 50;
+        }
+
+        .bi {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 4px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .bi svg {
+            width: 22px;
+            height: 22px;
+            stroke: var(--text3);
+            fill: none;
+            transition: stroke .2s
+        }
+
+        .bi-lbl {
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: .8px;
+            color: var(--text3);
+            text-transform: uppercase;
+            transition: color .2s
+        }
+
+        .bi.active svg {
+            stroke: var(--lime)
+        }
+
+        .bi.active .bi-lbl {
+            color: var(--lime)
+        }
+
+        .bi.active {
+            background: var(--lime-dim)
+        }
+
+        /* ========== SCREEN 0 — TODAY ========== */
+        .sc-today {
+            padding: 0 0 110px
+        }
+
+        .today-hero {
+            background: linear-gradient(160deg, #0d1422 0%, #0a0f1a 60%, #0d1020 100%);
+            padding: 20px 20px 16px;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .today-hero::before {
+            content: '';
+            position: absolute;
+            top: -40px;
+            right: -40px;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(200, 255, 0, 0.07) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .today-date {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text2);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 4px
+        }
+
+        .today-title {
+            font-family: var(--BAR);
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            line-height: 1
+        }
+
+        .today-title span {
+            color: var(--lime)
+        }
+
+        .today-subtitle {
+            font-size: 12px;
+            color: var(--text2);
+            margin-top: 4px
+        }
+
+        .macro-ring-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-top: 16px;
+        }
+
+        .calorie-ring {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            flex-shrink: 0
+        }
+
+        .calorie-ring svg {
+            width: 80px;
+            height: 80px;
+            transform: rotate(-90deg)
+        }
+
+        .ring-track {
+            fill: none;
+            stroke: var(--border2);
+            stroke-width: 7
+        }
+
+        .ring-fill {
+            fill: none;
+            stroke: var(--lime);
+            stroke-width: 7;
+            stroke-linecap: round;
+            stroke-dasharray: 220;
+            stroke-dashoffset: 60;
+            transition: stroke-dashoffset .8s ease
+        }
+
+        .ring-inner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .ring-kcal {
+            font-family: var(--BAR);
+            font-size: 17px;
+            font-weight: 900;
+            color: var(--text);
+            line-height: 1
+        }
+
+        .ring-lbl {
+            font-size: 8px;
+            color: var(--text2);
+            letter-spacing: .5px;
+            text-transform: uppercase
+        }
+
+        .macro-bars {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 7px
+        }
+
+        .macro-row {
+            display: flex;
+            flex-direction: column;
+            gap: 3px
+        }
+
+        .macro-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .macro-name {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text2);
+            letter-spacing: .5px;
+            text-transform: uppercase
+        }
+
+        .macro-nums {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text)
+        }
+
+        .macro-track {
+            height: 4px;
+            background: var(--border2);
+            border-radius: 2px;
+            overflow: hidden
+        }
+
+        .macro-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width .7s ease
+        }
+
+        .quick-log-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 10px 16px 0;
+            padding: 12px;
+            border-radius: 12px;
+            background: var(--lime);
+            border: none;
+            cursor: pointer;
+            font-family: var(--BAR);
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            color: #000;
+            transition: all .2s;
+        }
+
+        .quick-log-btn:hover {
+            background: #d4ff20;
+            transform: translateY(-1px)
+        }
+
+        .quick-log-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: #000
+        }
+
+        /* workout schedule */
+        .section-hdr {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px 10px;
+        }
+
+        .sec-title {
+            font-family: var(--BAR);
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text)
+        }
+
+        .sec-link {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--lime);
+            letter-spacing: .5px;
+            cursor: pointer
+        }
+
+        .workout-day-row {
+            display: flex;
+            gap: 8px;
+            padding: 0 20px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            margin-bottom: 14px;
+        }
+
+        .workout-day-row::-webkit-scrollbar {
+            display: none
+        }
+
+        .day-pill {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            padding: 9px 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            background: var(--card);
+            border: 1px solid var(--border);
+            transition: all .2s;
+        }
+
+        .day-pill.today {
+            background: var(--lime);
+            border-color: var(--lime)
+        }
+
+        .day-pill.today .dp-day {
+            color: #000
+        }
+
+        .day-pill.today .dp-type {
+            color: rgba(0, 0, 0, 0.6)
+        }
+
+        .day-pill.rest {
+            opacity: .5
+        }
+
+        .dp-day {
+            font-family: var(--BAR);
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: .5px;
+            color: var(--text)
+        }
+
+        .dp-type {
+            font-size: 9px;
+            font-weight: 500;
+            color: var(--text2);
+            text-transform: uppercase;
+            letter-spacing: .5px
+        }
+
+        .exercise-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 0 20px 0
+        }
+
+        .ex-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            cursor: pointer;
+            transition: all .2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ex-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--lime);
+            border-radius: 3px 0 0 3px;
+        }
+
+        .ex-card.rest::before {
+            background: var(--text3)
+        }
+
+        .ex-card:hover {
+            border-color: var(--border2);
+            transform: translateY(-1px)
+        }
+
+        .ex-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start
+        }
+
+        .ex-left {
+            flex: 1
+        }
+
+        .ex-name {
+            font-family: var(--BAR);
+            font-size: 15px;
+            font-weight: 800;
+            letter-spacing: .5px;
+            color: var(--text);
+            margin-bottom: 1px
+        }
+
+        .ex-muscle {
+            font-size: 9px;
+            color: var(--text2);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: .8px
+        }
+
+        .ex-badge {
+            font-family: var(--BAR);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .5px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+
+        .ex-sets-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .set-chip {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 6px 12px;
+            gap: 2px;
+        }
+
+        .set-val {
+            font-family: var(--BAR);
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--text)
+        }
+
+        .set-lbl {
+            font-size: 8px;
+            color: var(--text3);
+            text-transform: uppercase;
+            letter-spacing: .8px
+        }
+
+        .ex-done-btn {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--lime);
+            cursor: pointer;
+            letter-spacing: .5px;
+        }
+
+        .ex-done-btn input[type=checkbox] {
+            accent-color: var(--lime);
+            width: 14px;
+            height: 14px;
+            cursor: pointer
+        }
+
+        /* Expand state */
+        .ex-expand {
+            display: none;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border)
+        }
+
+        .ex-expand.open {
+            display: block
+        }
+
+        .ex-tip {
+            font-size: 12px;
+            color: var(--text2);
+            line-height: 1.5;
+            margin-bottom: 10px
+        }
+
+        .ex-tip strong {
+            color: var(--text);
+            font-weight: 600
+        }
+
+        .video-placeholder {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .video-placeholder:hover {
+            border-color: var(--lime-glow);
+            background: var(--lime-dim)
+        }
+
+        .video-placeholder span {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text2)
+        }
+
+        .play-icon {
+            width: 28px;
+            height: 28px;
+            background: var(--lime);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .play-icon svg {
+            width: 10px;
+            height: 10px;
+            fill: #000;
+            margin-left: 2px
+        }
+
+        /* ========== SCREEN 1 — GYM PLAN ========== */
+        .sc-gym {
+            padding: 0 0 110px
+        }
+
+        .plan-hero {
+            background: linear-gradient(160deg, #100e1a, #0a0a14);
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .plan-week-label {
+            font-size: 11px;
+            color: var(--text2);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 4px
+        }
+
+        .plan-week-title {
+            font-family: var(--BAR);
+            font-size: 26px;
+            font-weight: 900;
+            letter-spacing: 1px
+        }
+
+        .plan-week-title span {
+            color: var(--violet)
+        }
+
+        .plan-meta {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px
+        }
+
+        .pm-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text2)
+        }
+
+        .pm-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0
+        }
+
+        .week-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .wg-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            padding: 8px 4px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .wg-cell.active {
+            background: var(--violet);
+            border-radius: 10px
+        }
+
+        .wg-cell.done .wg-dot {
+            background: var(--lime)
+        }
+
+        .wg-cell.rest-day .wg-dot {
+            background: var(--text3)
+        }
+
+        .wg-day {
+            font-family: var(--BAR);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .5px;
+            color: var(--text2)
+        }
+
+        .wg-cell.active .wg-day {
+            color: #fff
+        }
+
+        .wg-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--text3)
+        }
+
+        .wg-cell.active .wg-dot {
+            background: #fff
+        }
+
+        .split-tabs {
+            display: flex;
+            gap: 6px;
+            padding: 14px 20px 10px;
+            overflow-x: auto;
+            scrollbar-width: none
+        }
+
+        .split-tabs::-webkit-scrollbar {
+            display: none
+        }
+
+        .split-tab {
+            flex-shrink: 0;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: var(--BAR);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .8px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text2);
+            text-transform: uppercase;
+            transition: all .2s;
+        }
+
+        .split-tab.active {
+            background: var(--violet);
+            border-color: var(--violet);
+            color: #fff
+        }
+
+        .plan-exercises {
+            padding: 0 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .plan-ex-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px 16px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .plan-ex-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            border-radius: 3px 0 0 3px
+        }
+
+        .plan-ex-card:nth-child(1)::before {
+            background: var(--violet)
+        }
+
+        .plan-ex-card:nth-child(2)::before {
+            background: var(--cyan)
+        }
+
+        .plan-ex-card:nth-child(3)::before {
+            background: var(--rose)
+        }
+
+        .plan-ex-card:nth-child(4)::before {
+            background: var(--amber)
+        }
+
+        .plan-ex-card:nth-child(5)::before {
+            background: var(--lime)
+        }
+
+        .plan-ex-card:hover {
+            border-color: var(--border2)
+        }
+
+        .pec-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .pec-num {
+            font-family: var(--BAR);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--text3);
+            text-transform: uppercase;
+        }
+
+        .pec-name {
+            font-family: var(--BAR);
+            font-size: 17px;
+            font-weight: 800;
+            letter-spacing: .5px;
+            margin-top: 2px
+        }
+
+        .pec-muscle {
+            font-size: 10px;
+            color: var(--text2);
+            text-transform: uppercase;
+            letter-spacing: .8px;
+            font-weight: 500;
+            margin-top: 1px
+        }
+
+        .pec-metrics {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px
+        }
+
+        .pec-m {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 6px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .pec-mv {
+            font-family: var(--BAR);
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--text)
+        }
+
+        .pec-ml {
+            font-size: 8px;
+            color: var(--text3);
+            text-transform: uppercase;
+            letter-spacing: .8px
+        }
+
+        .pec-progress {
+            margin-top: 10px
+        }
+
+        .pec-prog-track {
+            height: 3px;
+            background: var(--border2);
+            border-radius: 2px;
+            overflow: hidden
+        }
+
+        .pec-prog-fill {
+            height: 100%;
+            border-radius: 2px;
+            background: var(--violet);
+            width: 0%;
+            transition: width .8s ease
+        }
+
+        /* ========== SCREEN 2 — NUTRITION ========== */
+        .sc-nutr {
+            padding: 0 0 110px
+        }
+
+        .nutr-hero {
+            background: linear-gradient(160deg, #0a1210, #08100e);
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nutr-date {
+            font-size: 11px;
+            color: var(--text2);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 4px
+        }
+
+        .nutr-title {
+            font-family: var(--BAR);
+            font-size: 26px;
+            font-weight: 900;
+            letter-spacing: 1px
+        }
+
+        .nutr-title span {
+            color: var(--lime)
+        }
+
+        .big-calorie-display {
+            display: flex;
+            align-items: flex-end;
+            gap: 6px;
+            margin: 14px 0 4px;
+        }
+
+        .bc-consumed {
+            font-family: var(--BAR);
+            font-size: 52px;
+            font-weight: 900;
+            line-height: 1;
+            color: var(--lime)
+        }
+
+        .bc-sep {
+            font-family: var(--BAR);
+            font-size: 28px;
+            color: var(--text3);
+            margin-bottom: 6px
+        }
+
+        .bc-goal {
+            font-family: var(--BAR);
+            font-size: 28px;
+            color: var(--text2);
+            margin-bottom: 6px
+        }
+
+        .bc-unit {
+            font-size: 11px;
+            color: var(--text2);
+            font-weight: 500;
+            margin-bottom: 8px
+        }
+
+        .calorie-progress {
+            height: 6px;
+            background: var(--border2);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 4px
+        }
+
+        .calorie-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, var(--lime), #90ff00);
+            width: 60%;
+            transition: width .8s ease
+        }
+
+        .calorie-remaining {
+            font-size: 11px;
+            color: var(--text2);
+            font-weight: 500
+        }
+
+        .calorie-remaining span {
+            color: var(--lime);
+            font-weight: 700
+        }
+
+        .macro-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 14px
+        }
+
+        .ms-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 10px;
+            text-align: center;
+        }
+
+        .ms-val {
+            font-family: var(--BAR);
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text)
+        }
+
+        .ms-lbl {
+            font-size: 9px;
+            color: var(--text2);
+            text-transform: uppercase;
+            letter-spacing: .8px;
+            font-weight: 500;
+            margin-top: 2px
+        }
+
+        .ms-prog {
+            height: 3px;
+            border-radius: 2px;
+            margin-top: 8px;
+            background: var(--border2);
+            overflow: hidden
+        }
+
+        .ms-fill {
+            height: 100%;
+            border-radius: 2px
+        }
+
+        .add-meal-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 14px 20px;
+            padding: 14px;
+            border-radius: 14px;
+            background: var(--lime);
+            border: none;
+            cursor: pointer;
+            font-family: var(--BAR);
+            font-size: 15px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            color: #000;
+            transition: all .2s;
+        }
+
+        .add-meal-btn:hover {
+            background: #d4ff20;
+            transform: translateY(-1px)
+        }
+
+        .meal-section-title {
+            font-family: var(--BAR);
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text2);
+            padding: 0 20px 8px;
+        }
+
+        .meal-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            padding: 0 20px 8px
+        }
+
+        .meal-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+            cursor: pointer;
+            transition: all .2s;
+            position: relative;
+        }
+
+        .meal-card:hover {
+            border-color: var(--border2)
+        }
+
+        .mc-left {
+            width: 100%;
+            padding-right: 20px
+        }
+
+        .mc-name {
+            font-family: var(--BAR);
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 4px;
+            line-height: 1.2
+        }
+
+        .mc-macros {
+            font-size: 10px;
+            color: var(--text2);
+            font-weight: 500;
+            display: flex;
+            flex-direction: column;
+            gap: 1px
+        }
+
+        .mc-macros span {
+            color: var(--text);
+            font-weight: 600
+        }
+
+        .mc-kcal {
+            font-family: var(--BAR);
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--lime);
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+            margin-top: auto;
+        }
+
+        .mc-kcal-unit {
+            font-size: 10px;
+            color: var(--text2);
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            font-family: var(--DM)
+        }
+
+        .mc-delete {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            background: var(--rose-dim);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .mc-delete svg {
+            width: 12px;
+            height: 12px;
+            stroke: var(--rose)
+        }
+
+        /* Log Meal Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 200;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .25s;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: all
+        }
+
+        .modal {
+            background: var(--card2);
+            border: 1px solid var(--border2);
+            border-radius: 24px 24px 0 0;
+            padding: 24px 24px 40px;
+            width: 100%;
+            max-width: 430px;
+            transform: translateY(100%);
+            transition: transform .3s cubic-bezier(.25, .8, .25, 1);
+        }
+
+        .modal-overlay.open .modal {
+            transform: translateY(0)
+        }
+
+        .modal-handle {
+            width: 40px;
+            height: 4px;
+            background: var(--text3);
+            border-radius: 2px;
+            margin: 0 auto 20px
+        }
+
+        .modal-title {
+            font-family: var(--BAR);
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            margin-bottom: 18px
+        }
+
+        .meal-presets {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 16px
+        }
+
+        .meal-preset {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all .2s;
+            text-align: left;
+        }
+
+        .meal-preset:hover {
+            border-color: var(--lime-glow);
+            background: var(--lime-dim)
+        }
+
+        .meal-preset:hover .mp-name {
+            color: var(--lime)
+        }
+
+        .mp-icon {
+            font-size: 22px;
+            margin-bottom: 6px
+        }
+
+        .mp-name {
+            font-family: var(--BAR);
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: .5px;
+            color: var(--text);
+            margin-bottom: 2px
+        }
+
+        .mp-kcal {
+            font-size: 11px;
+            color: var(--text2);
+            font-weight: 500
+        }
+
+        .modal-input-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px
+        }
+
+        .modal-input {
+            flex: 1;
+            background: var(--bg2);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+
+            /* ─── BASE ─── */
+            * {
+                box-sizing: border-box;
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: var(--DM);
+                background: var(--bg);
+                color: var(--text);
+                overflow-x: hidden;
+            }
+
+            a {
+                text-decoration: none;
+                color: inherit;
+            }
+
+            padding:12px 14px;
+            font-family:var(--DM);
+            font-size:13px;
+            color:var(--text);
+            outline:none;
+            transition:border-color .2s;
+        }
+
+        .modal-input::placeholder {
+            color: var(--text3)
+        }
+
+        .modal-input:focus {
+            border-color: var(--lime)
+        }
+
+        .modal-confirm {
+            width: 100%;
+            padding: 14px;
+            background: var(--lime);
+            border: none;
+            border-radius: 12px;
+            font-family: var(--BAR);
+            font-size: 15px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            color: #000;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .modal-confirm:hover {
+            background: #d4ff20
+        }
+
+        /* ========== SCREEN 3 — RUN MAP ========== */
+        .sc-map {
+            padding: 0 0 0;
+            flex-direction: column;
+            height: calc(100vh - 130px)
+        }
+
+        .sc-map.active {
+            display: flex !important;
+        }
+
+        .map-wrap {
+            position: relative;
+            flex: 1;
+            background: var(--bg2);
+            overflow: hidden;
+            min-height: 280px;
+        }
+
+        .map-wrap canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            cursor: grab;
+            touch-action: none
+        }
+
+        .map-hud-tl {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            z-index: 5;
+            background: rgba(8, 10, 16, 0.88);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            padding: 10px 14px;
+        }
+
+        .hud-val {
+            font-family: var(--BAR);
+            font-size: 18px;
+            font-weight: 900;
+            color: var(--lime)
+        }
+
+        .hud-lbl {
+            font-size: 9px;
+            color: var(--text2);
+            text-transform: uppercase;
+            letter-spacing: .8px;
+            font-weight: 500
+        }
+
+        .map-hud-tr {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            z-index: 5;
+            background: rgba(8, 10, 16, 0.88);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            padding: 10px 14px;
+            text-align: right;
+        }
+
+        .map-scan {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0, 229, 255, 0.015) 3px, rgba(0, 229, 255, 0.015) 4px);
+        }
+
+        .map-vignette {
+            position: absolute;
+            inset: 0;
+            z-index: 3;
+            pointer-events: none;
+            background: radial-gradient(ellipse at center, transparent 40%, rgba(8, 10, 16, .7) 100%);
+        }
+
+        .live-bar {
+            display: flex;
+            background: var(--card);
+            border-top: 1px solid var(--border);
+            padding: 10px 8px;
+            gap: 4px;
+        }
+
+        .lb-cell {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            padding: 6px 4px;
+        }
+
+        .lb-v {
+            font-family: var(--BAR);
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--text)
+        }
+
+        .lb-l {
+            font-size: 8px;
+            color: var(--text3);
+            text-transform: uppercase;
+            letter-spacing: .8px;
+            font-weight: 600
+        }
+
+        .run-missions {
+            padding: 10px 16px 0;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px
+        }
+
+        .run-mission {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+            position: relative;
+        }
+
+        .rm-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: var(--lime-dim);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .rm-icon svg {
+            width: 16px;
+            height: 16px;
+            stroke: var(--lime)
+        }
+
+        .rm-info {
+            width: 100%
+        }
+
+        .rm-title {
+            font-family: var(--BAR);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 6px;
+            line-height: 1.2;
+            min-height: 30px
+        }
+
+        .rm-prog {
+            height: 4px;
+            background: var(--border2);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 4px
+        }
+
+        .rm-fill {
+            height: 100%;
+            border-radius: 2px;
+            background: var(--lime);
+            transition: width .6s ease
+        }
+
+        .rm-pts {
+            font-family: var(--BAR);
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--lime);
+            position: absolute;
+            top: 12px;
+            right: 12px
+        }
+
+        .run-start-btn {
+            margin: 10px 16px 0;
+            padding: 14px;
+            border-radius: 14px;
+            border: none;
+            cursor: pointer;
+            font-family: var(--BAR);
+            font-size: 15px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            transition: all .25s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .run-start-btn.idle {
+            background: linear-gradient(135deg, var(--lime), #80ff00);
+            color: #000
+        }
+
+        .run-start-btn.running {
+            background: linear-gradient(135deg, var(--rose), #ff6b9d);
+            color: #fff
+        }
+
+        .run-start-btn svg {
+            width: 18px;
+            height: 18px
+        }
+
+        .run-start-btn.idle svg {
+            fill: #000
+        }
+
+        .run-start-btn.running svg {
+            fill: #fff
+        }
+
+        /* ========== SCREEN 4 — ARENA (Sports Modes) ========== */
+        .sc-arena {
+            padding: 0 20px 110px
+        }
+
+        .arena-hero {
+            background: linear-gradient(160deg, #12080a, #0a0810);
+            margin: 0 -20px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .arena-label {
+            font-size: 11px;
+            color: var(--text2);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 4px
+        }
+
+        .arena-title {
+            font-family: var(--BAR);
+            font-size: 26px;
+            font-weight: 900
+        }
+
+        .arena-title span {
+            color: var(--rose)
+        }
+
+        .arena-subtitle {
+            font-size: 12px;
+            color: var(--text2);
+            margin-top: 3px
+        }
+
+        .sport-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px
+        }
+
+        .sport-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px 14px;
+            cursor: pointer;
+            transition: all .2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sport-card.sel {
+            border-width: 2px
+        }
+
+        .sport-card:hover {
+            transform: translateY(-2px)
+        }
+
+        .sc-icon {
+            font-size: 28px;
+            margin-bottom: 8px
+        }
+
+        .sc-name {
+            font-family: var(--BAR);
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: .5px;
+            margin-bottom: 2px
+        }
+
+        .sc-sub {
+            font-size: 10px;
+            color: var(--text2);
+            font-weight: 500;
+            margin-bottom: 8px
+        }
+
+        .sc-mult {
+            display: inline-flex;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-family: var(--BAR);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .5px;
+        }
+
+        .sc-shine {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, currentColor 0%, transparent 70%);
+            opacity: 0.04;
+            pointer-events: none;
+        }
+
+        .sport-panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            overflow: hidden;
+        }
+
+        .sp-viz {
+            height: 140px;
+            background: var(--bg2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden
+        }
+
+        .sp-body {
+            padding: 16px
+        }
+
+        .sp-title {
+            font-family: var(--BAR);
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            margin-bottom: 3px
+        }
+
+        .sp-desc {
+            font-size: 12px;
+            color: var(--text2);
+            margin-bottom: 14px
+        }
+
+        .sp-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 14px
+        }
+
+        .sp-stat {
+            text-align: center
+        }
+
+        .sp-stat-v {
+            font-family: var(--BAR);
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--text)
+        }
+
+        .sp-stat-l {
+            font-size: 8px;
+            color: var(--text3);
+            text-transform: uppercase;
+            letter-spacing: .8px;
+            font-weight: 600;
+            margin-top: 1px
+        }
+
+        .sp-start-btn {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-family: var(--BAR);
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            color: #fff;
+            transition: all .2s;
+        }
+
+        /* ─── Football viz ─── */
+        .ff {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        .ff-field {
+            width: 80%;
+            height: 80%;
+            border: 2px solid rgba(0, 230, 118, 0.3);
+            border-radius: 4px;
+            position: relative;
+            background: rgba(0, 230, 118, 0.03);
+        }
+
+        .ff-mid {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: rgba(0, 230, 118, 0.2)
+        }
+
+        .ff-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 30%;
+            padding-bottom: 30%;
+            border: 1px solid rgba(0, 230, 118, 0.25);
+            border-radius: 50%;
+        }
+
+        .ff-cov {
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            width: 40%;
+            height: 45%;
+            background: rgba(0, 230, 118, 0.12);
+            border: 1px solid rgba(0, 230, 118, 0.3);
+            border-radius: 2px;
+        }
+
+        .ff-player {
+            position: absolute;
+            top: 42%;
+            left: 32%;
+            width: 8px;
+            height: 8px;
+            background: var(--cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--cyan);
+        }
+
+        /* ─── Cricket viz ─── */
+        .cf {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative
+        }
+
+        .cf-oval {
+            width: 70%;
+            padding-bottom: 70%;
+            border: 2px solid rgba(255, 140, 66, 0.3);
+            border-radius: 50%;
+            position: relative;
+            background: rgba(255, 140, 66, 0.03);
+        }
+
+        .cf-pitch {
+            position: absolute;
+            top: 30%;
+            left: 38%;
+            width: 24%;
+            height: 40%;
+            background: rgba(255, 140, 66, 0.12);
+            border: 1px solid rgba(255, 140, 66, 0.35);
+            border-radius: 2px;
+        }
+
+        .cf-score {
+            position: absolute;
+            bottom: 12px;
+            right: 16px;
+            font-family: var(--BAR);
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--amber);
+        }
+
+        /* ─── Cycling viz ─── */
+        .cv {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px
+        }
+
+        .cv-speed {
+            text-align: center
+        }
+
+        .cv-speed-n {
+            font-family: var(--BAR);
+            font-size: 36px;
+            font-weight: 900;
+            color: var(--cyan)
+        }
+
+        .cv-speed-l {
+            font-size: 10px;
+            color: var(--text2);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-weight: 600
+        }
+
+        .cv-road {
+            width: 80%;
+            height: 4px;
+            background: rgba(0, 229, 255, 0.15);
+            border-radius: 2px;
+            overflow: hidden
+        }
+
+        .cv-road-line {
+            height: 100%;
+            background: repeating-linear-gradient(90deg, var(--cyan) 0px, var(--cyan) 16px, transparent 16px, transparent 32px);
+            animation: roadMove 0.5s linear infinite;
+            width: 200%;
+        }
+
+        @keyframes roadMove {
+            from {
+                transform: translateX(0)
+            }
+
+            to {
+                transform: translateX(-50%)
+            }
+        }
+
+        /* ─── Sprint viz ─── */
+        .sv {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative
+        }
+
+        .sv-lanes {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 80%
+        }
+
+        .sv-lane {
+            height: 14px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden
+        }
+
+        .sv-lane:nth-child(2) .sv-runner {
+            background: var(--rose);
+            animation-delay: .15s;
+            animation-duration: .9s
+        }
+
+        .sv-lane:nth-child(3) .sv-runner {
+            background: rgba(255, 255, 255, 0.2);
+            animation-delay: .3s;
+            animation-duration: 1.1s
+        }
+
+        .sv-lane:nth-child(4) .sv-runner {
+            background: rgba(255, 255, 255, 0.15);
+            animation-delay: .05s;
+            animation-duration: 1.3s
+        }
+
+        .sv-runner {
+            position: absolute;
+            top: 2px;
+            left: 0;
+            height: 10px;
+            width: 30%;
+            border-radius: 2px;
+            background: var(--rose);
+            animation: sprint 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes sprint {
+            from {
+                left: 0%
+            }
+
+            to {
+                left: 70%
+            }
+        }
+
+        /* ─── Leaderboard screen ─── */
+        .sc-lb {
+            padding: 0 20px 110px
+        }
+
+        .lb-hero {
+            background: linear-gradient(160deg, #0a0c14, #0a0f1a);
+            margin: 0 -20px;
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .lb-title {
+            font-family: var(--BAR);
+            font-size: 26px;
+            font-weight: 900;
+            letter-spacing: 1px
+        }
+
+        .lb-title span {
+            color: var(--amber)
+        }
+
+        .lb-filter-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            scrollbar-width: none
+        }
+
+        .lb-filter-row::-webkit-scrollbar {
+            display: none
+        }
+
+        .lb-filter {
+            flex-shrink: 0;
+            padding: 7px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: var(--BAR);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .8px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text2);
+            text-transform: uppercase;
+            transition: all .2s;
+        }
+
+        .lb-filter.active {
+            background: var(--amber);
+            border-color: var(--amber);
+            color: #000
+        }
+
+        .podium {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding: 0 10px
+        }
+
+        .podium-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px
+        }
+
+        .p-ava {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--BAR);
+            font-size: 16px;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .p-name {
+            font-family: var(--BAR);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .5px
+        }
+
+        .p-km {
+            font-size: 10px;
+            color: var(--text2);
+            font-weight: 500
+        }
+
+        .p-block {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .p-num {
+            font-family: var(--BAR);
+            font-size: 18px;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.4)
+        }
+
+        .podium-col.p1 .p-block {
+            background: linear-gradient(180deg, rgba(245, 200, 66, .2), rgba(245, 200, 66, .08));
+            height: 90px;
+            width: 90px
+        }
+
+        .podium-col.p2 .p-block {
+            background: linear-gradient(180deg, rgba(77, 141, 255, .15), rgba(77, 141, 255, .06));
+            height: 70px;
+            width: 80px
+        }
+
+        .podium-col.p3 .p-block {
+            background: linear-gradient(180deg, rgba(200, 200, 220, .1), rgba(200, 200, 220, .04));
+            height: 55px;
+            width: 80px
+        }
+
+        .podium-col.p1 .p-ava {
+            border: 2px solid rgba(245, 200, 66, 0.5);
+            background: linear-gradient(135deg, rgba(245, 200, 66, .25), rgba(245, 200, 66, .1))
+        }
+
+        .podium-col.p2 .p-ava {
+            border: 2px solid rgba(77, 141, 255, 0.4);
+            background: linear-gradient(135deg, rgba(77, 141, 255, .2), rgba(77, 141, 255, .08))
+        }
+
+        .podium-col.p3 .p-ava {
+            border: 2px solid rgba(200, 200, 220, .25);
+            background: rgba(255, 255, 255, .06)
+        }
+
+        .lb-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px
+        }
+
+        .lb-item {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .lb-rank {
+            font-family: var(--BAR);
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--text3);
+            width: 24px;
+            flex-shrink: 0
+        }
+
+        .lb-ava {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--BAR);
+            font-size: 13px;
+            font-weight: 800;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .lb-info {
+            flex: 1
+        }
+
+        .lb-name {
+            font-family: var(--BAR);
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 1px
+        }
+
+        .lb-sub {
+            font-size: 10px;
+            color: var(--text2);
+            font-weight: 500
+        }
+
+        .lb-score {
+            font-family: var(--BAR);
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--amber)
+        }
+
+        .lb-you {
+            font-family: var(--BAR);
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: .8px;
+            background: var(--lime-dim);
+            color: var(--lime);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 6px;
+        }
+
+        /* ─── CLAN SCREEN ─── */
+        .sc-clan {
+            padding: 0 20px 110px
+        }
+
+        .clan-hero {
+            background: linear-gradient(160deg, #140a1a, #0a0a1a);
+            margin: 0 -20px;
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .clan-badge {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px
+        }
+
+        .cb-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: var(--violet);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 0 16px var(--violet-dim)
+        }
+
+        .cb-info {
+            flex: 1
+        }
+
+        .cb-name {
+            font-family: var(--BAR);
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            line-height: 1;
+            margin-bottom: 2px
+        }
+
+        .cb-stats {
+            font-size: 11px;
+            color: var(--text2);
+            font-weight: 500;
+            display: flex;
+            gap: 10px
+        }
+
+        .cb-stats span {
+            color: var(--text);
+            font-weight: 700
+        }
+
+        .war-banner {
+            background: linear-gradient(135deg, var(--rose), #c91c49);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 24px var(--rose-dim);
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .war-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 60%);
+            pointer-events: none
+        }
+
+        .wb-left {
+            position: relative;
+            z-index: 2
+        }
+
+        .wb-title {
+            font-family: var(--BAR);
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            color: #fff;
+            line-height: 1.1
+        }
+
+        .wb-status {
+            font-size: 10px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.8);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px
+        }
+
+        .wb-btn {
+            background: #fff;
+            color: var(--rose);
+            font-family: var(--BAR);
+            font-size: 13px;
+            font-weight: 800;
+            padding: 8px 14px;
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            cursor: pointer
+        }
+
+        .squad-room {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px
+        }
+
+        .sr-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px
+        }
+
+        .sr-title {
+            font-family: var(--BAR);
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: .5px
+        }
+
+        .sr-mems {
+            display: flex;
+            gap: 4px
+        }
+
+        .sm-ava {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--bg2);
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text2);
+            position: relative
+        }
+
+        .sm-ava.filled {
+            background: var(--cyan);
+            color: #000;
+            border-color: var(--cyan)
+        }
+
+        .sm-ava.filled::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: -2px;
+            width: 10px;
+            height: 10px;
+            background: var(--lime);
+            border-radius: 50%;
+            border: 2px solid var(--card)
+        }
+
+        .sr-invite {
+            width: 100%;
+            padding: 12px;
+            background: var(--cyan-dim);
+            border: 1px dashed var(--cyan);
+            border-radius: 10px;
+            color: var(--cyan);
+            font-family: var(--BAR);
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            cursor: pointer;
+            margin-top: 10px
+        }
+
+        .event-cal {
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .ec-item {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px
+        }
+
+        .ec-time {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--bg2);
+            padding: 8px 10px;
+            border-radius: 10px;
+            min-width: 60px;
+            flex-shrink: 0
+        }
+
+        .ec-time-v {
+            font-family: var(--BAR);
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text);
+            line-height: 1
+        }
+
+        .ec-time-l {
+            font-size: 9px;
+            font-weight: 700;
+            color: var(--text3);
+            text-transform: uppercase;
+            margin-top: 2px
+        }
+
+        .ec-info {
+            flex: 1
+        }
+
+        .ec-title {
+            font-family: var(--BAR);
+            font-size: 15px;
+            font-weight: 800;
+            margin-bottom: 2px
+        }
+
+        .ec-sub {
+            font-size: 11px;
+            color: var(--text2)
+        }
+
+        .ec-tag {
+            font-family: var(--BAR);
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: var(--lime-dim);
+            color: var(--lime)
+        }
+
+        .ec-item.flash {
+            border-color: var(--amber);
+            background: linear-gradient(90deg, var(--amber-dim), transparent)
+        }
+
+        .ec-item.flash .ec-time {
+            background: var(--amber);
+            color: #000
+        }
+
+        .ec-item.flash .ec-time-l {
+            color: rgba(0, 0, 0, 0.6)
+        }
+
+        /* ─── HUB SUBNAV ─── */
+        .hub-nav {
+            display: flex;
+            background: var(--bg2);
+            border-radius: 12px;
+            padding: 6px;
+            margin-bottom: 20px;
+        }
+
+        .hn-item {
+            flex: 1;
+            text-align: center;
+            padding: 8px 4px;
+            font-family: var(--BAR);
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--text2);
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all .2s;
+        }
+
+        .hn-item.active {
+            background: var(--card);
+            color: var(--lime);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .hn-item:hover:not(.active) {
+            color: var(--text);
+        }
+
+        /* ─── APP WRAPPER & PREVIEW ─── */
+        body {
+            background: #0f0a14;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .device-frame {
+            width: 375px;
+            height: 812px;
+            border-radius: 40px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 0 0 12px #222, 0 20px 60px rgba(0, 0, 0, 0.8);
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            margin: 40px 0;
+        }
+
+        .auth-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background: radial-gradient(circle at top, #140a1a, #04040a);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .auth-content {
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .auth-logo {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .al-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px var(--lime);
+        }
+
+        .al-text {
+            font-family: var(--BAR);
+            font-size: 42px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            line-height: 1;
+        }
+
+        .al-text span {
+            color: var(--lime);
+        }
+
+        .al-sub {
+            font-size: 11px;
+            color: var(--text2);
+            letter-spacing: 2px;
+            margin-top: 4px;
+            font-weight: 700;
+        }
+
+        .auth-form {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .input-grp {
+            margin-bottom: 16px;
+            box-sizing: border-box;
+        }
+
+        .input-grp label {
+            font-size: 10px;
+            color: var(--text2);
+            font-weight: 700;
+            margin-bottom: 6px;
+            display: block;
+            letter-spacing: .5px;
+        }
+
+        .input-grp input {
+            width: 100%;
+            box-sizing: border-box;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 14px;
+            border-radius: 12px;
+            font-family: var(--DM);
+            font-size: 14px;
+            outline: none;
+            transition: all .2s;
+        }
+
+        .input-grp input:focus {
+            border-color: var(--lime);
+        }
+
+        .auth-btn {
+            width: 100%;
+            background: var(--lime);
+            color: #000;
+            font-family: var(--BAR);
+            font-size: 16px;
+            font-weight: 800;
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: transform .2s;
+        }
+
+        .auth-btn:active {
+            transform: scale(0.96);
+        }
+
+        .auth-links {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text2);
+            margin-top: 20px;
+            font-weight: 500;
+        }
+
+        .auth-links span {
+            color: var(--lime);
+            cursor: pointer;
+            font-weight: 700;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="device-frame">
+        <!-- ─── AUTH SCREEN ─── -->
+        <div class="auth-screen" id="authScreen">
+            <div class="auth-content">
+                <div class="auth-logo">
+                    <div class="al-icon">⚡</div>
+                    <div class="al-text">FIT<span>STRIKE</span></div>
+                    <div class="al-sub">CONQUER YOUR TURF</div>
+                </div>
+                <div class="auth-form" id="loginForm">
+                    <div class="input-grp">
+                        <label>EMAIL</label>
+                        <input type="email" value="striker@fitstrike.gg">
+                    </div>
+                    <div class="input-grp">
+                        <label>PASSWORD</label>
+                        <input type="password" value="********">
+                    </div>
+                    <button class="auth-btn" id="loginBtn" onclick="doLogin()">INITIALIZE PROTOCOL</button>
+                    <div class="auth-links">
+                        Forgot Password? &nbsp;|&nbsp; <span onclick="toggleAuth()">Create Account</span>
+                    </div>
+                </div>
+                <div class="auth-form" id="signupForm" style="display:none;">
+                    <div class="input-grp">
+                        <label>USERNAME</label>
+                        <input type="text" placeholder="Striker_99">
+                    </div>
+                    <div class="input-grp">
+                        <label>EMAIL</label>
+                        <input type="email" placeholder="striker@fitstrike.gg">
+                    </div>
+                    <div class="input-grp">
+                        <label>PASSWORD</label>
+                        <input type="password" placeholder="********">
+                    </div>
+                    <button class="auth-btn" id="signupBtn" onclick="doLogin()">CREATE ACCOUNT</button>
+                    <div class="auth-links">
+                        Already have an account? &nbsp;|&nbsp; <span onclick="toggleAuth()">Log In</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-app" id="mainApp"
+            style="display:none; flex-direction:column; height:100%; position:relative; overflow:hidden;">
+
+            <!-- ─── HEADER ─── -->
+            <header class="hdr" style="position:relative; z-index:10; border-radius:0;">
+                <div style="display:flex;align-items:center;gap:4px">
+                    <div class="logo">FITSTRIKE</div>
+                    <div class="logo-badge">PRO</div>
+                </div>
+                <div class="hdr-right">
+                    <div class="streak-chip">
+                        <span>🔥 14</span>
+                    </div>
+                    <div class="avatar">RK</div>
+                </div>
+            </header>
+
+            <!-- ─── TOP NAV REMOVED FOR VERTICAL SPACE ─── -->
+
+            <!-- ─── SCREENS ─── -->
+            <div class="screens" style="flex:1; overflow-y:auto; overflow-x:hidden; position:relative;">
+
+                <!-- ══════════ SCREEN 0 — TODAY ══════════ -->
+                <div class="screen active sc-today" id="sc0">
+
+                    <div class="today-hero">
+                        <div class="today-date">Monday · March 23, 2026</div>
+                        <div class="today-title">PUSH <span>DAY</span></div>
+                        <div class="today-subtitle">Chest · Shoulders · Triceps &nbsp;·&nbsp; 6 exercises</div>
+
+                        <div class="macro-ring-row">
+                            <div class="calorie-ring">
+                                <svg viewBox="0 0 80 80">
+                                    <circle class="ring-track" cx="40" cy="40" r="35" />
+                                    <circle class="ring-fill" cx="40" cy="40" r="35" />
+                                </svg>
+                                <div class="ring-inner">
+                                    <div class="ring-kcal">1740</div>
+                                    <div class="ring-lbl">kcal</div>
+                                </div>
+                            </div>
+                            <div class="macro-bars">
+                                <div class="macro-row">
+                                    <div class="macro-top"><span class="macro-name">Protein</span><span
+                                            class="macro-nums">128 / 180g</span></div>
+                                    <div class="macro-track">
+                                        <div class="macro-fill" style="width:71%;background:var(--cyan)"></div>
+                                    </div>
+                                </div>
+                                <div class="macro-row">
+                                    <div class="macro-top"><span class="macro-name">Carbs</span><span
+                                            class="macro-nums">195 / 280g</span></div>
+                                    <div class="macro-track">
+                                        <div class="macro-fill" style="width:70%;background:var(--amber)"></div>
+                                    </div>
+                                </div>
+                                <div class="macro-row">
+                                    <div class="macro-top"><span class="macro-name">Fats</span><span
+                                            class="macro-nums">48 / 70g</span></div>
+                                    <div class="macro-track">
+                                        <div class="macro-fill" style="width:69%;background:var(--violet)"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="quick-log-btn" onclick="openModal()">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 5v14M5 12h14" />
+                            </svg>
+                            LOG A MEAL
+                        </button>
+                    </div>
+
+                    <div class="section-hdr">
+                        <div class="sec-title">Today's Workout</div>
+                        <div class="sec-link">Full Plan ›</div>
+                    </div>
+
+                    <!-- Day pills -->
+                    <div class="workout-day-row">
+                        <div class="day-pill" style="opacity:.5">
+                            <div class="dp-day">MON</div>
+                            <div class="dp-type">Pull</div>
+                        </div>
+                        <div class="day-pill" style="opacity:.5">
+                            <div class="dp-day">TUE</div>
+                            <div class="dp-type">Legs</div>
+                        </div>
+                        <div class="day-pill today">
+                            <div class="dp-day">WED</div>
+                            <div class="dp-type">Push</div>
+                        </div>
+                        <div class="day-pill rest">
+                            <div class="dp-day">THU</div>
+                            <div class="dp-type">Rest</div>
+                        </div>
+                        <div class="day-pill">
+                            <div class="dp-day">FRI</div>
+                            <div class="dp-type">Pull</div>
+                        </div>
+                        <div class="day-pill rest">
+                            <div class="dp-day">SAT</div>
+                            <div class="dp-type">Rest</div>
+                        </div>
+                        <div class="day-pill">
+                            <div class="dp-day">SUN</div>
+                            <div class="dp-type">Legs</div>
+                        </div>
+                    </div>
+
+                    <!-- Exercise cards -->
+                    <div class="exercise-list">
+                        <div class="ex-card" onclick="toggleEx(this)">
+                            <div class="ex-top">
+                                <div class="ex-left">
+                                    <div class="ex-name">Bench Press</div>
+                                    <div class="ex-muscle">Chest · Primary</div>
+                                </div>
+                                <div class="ex-badge" style="background:var(--cyan-dim);color:var(--cyan)">Compound
+                                </div>
+                            </div>
+                            <div class="ex-sets-row">
+                                <div class="set-chip">
+                                    <div class="set-val">4</div>
+                                    <div class="set-lbl">Sets</div>
+                                </div>
+                                <div class="set-chip">
+                                    <div class="set-val">8–10</div>
+                                    <div class="set-lbl">Reps</div>
+                                </div>
+                                <div class="set-chip">
+                                    <div class="set-val">80 kg</div>
+                                    <div class="set-lbl">Weight</div>
+                                </div>
+                                <div class="set-chip">
+                                    <div class="set-val">90s</div>
+                                    <div class="set-lbl">Rest</div>
+                                </div>
+                            </div>
+                            <div class="ex-expand">
+                                <div class="ex-tip"><strong>Form cue:</strong> Retract scapula, arch slightly, bar path
+                                    to lower chest. Keep elbows at 75° — not flared out.</div>
+                                <div class="video-placeholder">
+                                    <div class="play-icon"><svg viewBox="0 0 12 12">
+                                            <path d="M3 2l7 4-7 4z" />
+                                        </svg></div>
+                                    <span>Watch Form Guide</span>
+                                </div>
+                            </div>
+                            <label class="ex-done-btn" onclick="markDone(event,this)">
+                                <input type="checkbox"> Mark Complete
+                            </label>
+                        </div>
+
+                        <div class="ex-card" onclick="toggleEx(this)">
+                            <div class="ex-top">
+                                <div class="ex-left">
+                                    <div class="ex-name">Overhead Press</div>
+                                    <div class="ex-muscle">Shoulders · Primary</div>
+                                </div>
+                                <div class="ex-badge" style="background:var(--violet-dim);color:var(--violet)">Compound
+                                </div>
+                            </div>
+                            <div class="ex-sets-row">
+                                <div class="set-chip">
+                                    <div class="set-val">4</div>
+                                    <div class="set-lbl">Sets</div>
+                                </div>
+                                <div class="set-chip">
+                                    <div class="set-val">6–8</div>
+                                    <div class="set-lbl">Reps</div>
+                                </div>
+                                <div class="set-chip">
+                                    <div class="set-val">55 kg</div>
+                                    <div class="set-lbl">Weight</div>
+                                </div>
+                                <div class="set-chip">
+                                    <div class="set-val">90s</div>
+                                    <div class="set-lbl">Rest</div>
+                                </div>
+                            </div>
+                            <div class="ex-expand">
+                                <div class="ex-tip"><strong>Form cue:</strong> Brace core hard. Bar travels in a
+                                    straight line. Push head through at lockout. No lower-back arch.</div>
+                                <div class="video-placeholder">
+                                    <div class="play-icon"><svg viewBox="0 0 12 12">
+                                            <path d="M3 2l7 4-7 4z" />
+                                        </svg></div>
+                                    <span>Watch Form Guide</span>
+                                </div>
+                            </div>
+                            <label class="ex-done-btn" onclick="markDone(event,this)">
+                                <input type="checkbox"> Mark Complete
+                            </label>
+                        </div>
+
+                        <div class="ex-card" onclick="toggleEx(this)">
+                            <div class="ex-top">
+                                <div class="ex-left">
+                                    <div class="ex-name">Incline Dumbbell Press</div>
+                                    <div class="ex-muscle">Upper Chest · Primary</div>
+                                </div>
+                                <div class="ex-badge" style="background:var(--lime-dim);color:var(--lime)">Isolation
+                                </div>
+                            </div>
+                            <div class="ex-sets-row">
+                                <div class="set-chip">
+                                    <div class="set-val">3</div>
+                                    <div class="set-lbl">Sets</div>
+                                </div>
+                                <div class="set-chip">
+                                    <div class="set-val">10–12</div>
+                                    <div class="set-lbl">Reps</div>
+                                </div>
+                                <div class="set-chip">
+                                    <div class="set-val">30 kg</div>
+                                    <div class="set-lbl">Weight</div>
+                                </div>
+                                <div class="set-chip">
+                                    <div class="set-val">75s</div>
+                                    <div class="set-lbl">Rest</div>
+                                </div>
+                            </div>
+                            <div class="ex-expand">
+                                <div class="ex-tip"><strong>Form cue:</strong> 30–45° incline. Squeeze at top,
+                                    controlled eccentric. Don't let the dumbbells flare too wide.</div>
+                                <div class="video-placeholder">
+                                    <div class="play-icon"><svg viewBox="0 0 12 12">
+                                            <path d="M3 2l7 4-7 4z" />
+                                        </svg></div>
+                                    <span>Watch Form Guide</span>
+                                </div>
+                            </div>
+                            <label class="ex-done-btn" onclick="markDone(event,this)">
+                                <input type="checkbox"> Mark Complete
+                            </label>
+                        </div>
+
+                        <div class="ex-card" onclick="toggleEx(this)">
+                            <div class="ex-top">
+                                <div class="ex-left">
+                                    <div class="ex-name">Lateral Raises</div>
+                                    <div class="ex-muscle">Side Delts · Isolation</div>
+                                </div>
+                                <div class="ex-badge" style="background:var(--amber-dim);color:var(--amber)">Isolation
+                                </div>
+                            </div>
+                            <div class="ex-sets-row">
+                                <div class="set-chip">
+                                    <div class="set-val">4</div>
+                                    <div class="set-lbl">Sets</div>
+                                </div>
+                                <div class="set-chip">
+                                    <div class="set-val">15–20</div>
+                                    <div class="set-lbl">Reps</div>
+                                </div>
+                                <div class="set-chip">
+                                    <div class="set-val">12 kg</div>
+                                    <div class="set-lbl">Weight</div>
+                                </div>
+                                <div class="set-chip">
+                                    <div class="set-val">60s</div>
+                                    <div class="set-lbl">Rest</div>
+                                </div>
+                            </div>
+                            <div class="ex-expand">
+                                <div class="ex-tip"><strong>Form cue:</strong> Slight forward lean, lead with elbows,
+                                    stop at shoulder height. Slow 3s eccentric — this is where the growth is.</div>
+                                <div class="video-placeholder">
+                                    <div class="play-icon"><svg viewBox="0 0 12 12">
+                                            <path d="M3 2l7 4-7 4z" />
+                                        </svg></div>
+                                    <span>Watch Form Guide</span>
+                                </div>
+                            </div>
+                            <label class="ex-done-btn" onclick="markDone(event,this)">
+                                <input type="checkbox"> Mark Complete
+                            </label>
+                        </div>
+
+                        <div class="ex-card" onclick="toggleEx(this)">
+                            <div class="ex-top">
+                                <div class="ex-left">
+                                    <div class="ex-name">Tricep Pushdowns</div>
+                                    <div class="ex-muscle">Triceps · Isolation</div>
+                                </div>
+                                <div class="ex-badge" style="background:var(--rose-dim);color:var(--rose)">Isolation
+                                </div>
+                            </div>
+                            <div class="ex-sets-row">
+                                <div class="set-chip">
+                                    <div class="set-val">3</div>
+                                    <div class="set-lbl">Sets</div>
+                                </div>
+                                <div class="set-chip">
+                                    <div class="set-val">12–15</div>
+                                    <div class="set-lbl">Reps</div>
+                                </div>
+                                <div class="set-chip">
+                                    <div class="set-val">Cable</div>
+                                    <div class="set-lbl">Type</div>
+                                </div>
+                                <div class="set-chip">
+                                    <div class="set-val">60s</div>
+                                    <div class="set-lbl">Rest</div>
+                                </div>
+                            </div>
+                            <div class="ex-expand">
+                                <div class="ex-tip"><strong>Form cue:</strong> Keep elbows pinned to sides. Full
+                                    extension at bottom. Don't let elbows flare — keep constant tension.</div>
+                                <div class="video-placeholder">
+                                    <div class="play-icon"><svg viewBox="0 0 12 12">
+                                            <path d="M3 2l7 4-7 4z" />
+                                        </svg></div>
+                                    <span>Watch Form Guide</span>
+                                </div>
+                            </div>
+                            <label class="ex-done-btn" onclick="markDone(event,this)">
+                                <input type="checkbox"> Mark Complete
+                            </label>
+                        </div>
+                    </div>
+
+                </div><!-- /sc0 -->
+
+                <!-- ══════════ SCREEN 1 — GYM PLAN ══════════ -->
+                <div class="screen sc-gym" id="sc1">
+                    <div class="plan-hero">
+                        <div class="plan-week-label">Week 8 of 12</div>
+                        <div class="plan-week-title">PPL <span>SPLIT</span></div>
+                        <div class="plan-meta">
+                            <div class="pm-item">
+                                <div class="pm-dot" style="background:var(--lime)"></div>Push · Pull · Legs
+                            </div>
+                            <div class="pm-item">
+                                <div class="pm-dot" style="background:var(--cyan)"></div>5 days/week
+                            </div>
+                            <div class="pm-item">
+                                <div class="pm-dot" style="background:var(--amber)"></div>Hypertrophy
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Week grid -->
+                    <div class="week-grid">
+                        <div class="wg-cell done">
+                            <div class="wg-day">M</div>
+                            <div class="wg-dot"></div>
+                        </div>
+                        <div class="wg-cell done">
+                            <div class="wg-day">T</div>
+                            <div class="wg-dot"></div>
+                        </div>
+                        <div class="wg-cell active">
+                            <div class="wg-day">W</div>
+                            <div class="wg-dot"></div>
+                        </div>
+                        <div class="wg-cell rest-day">
+                            <div class="wg-day">T</div>
+                            <div class="wg-dot"></div>
+                        </div>
+                        <div class="wg-cell">
+                            <div class="wg-day">F</div>
+                            <div class="wg-dot"></div>
+                        </div>
+                        <div class="wg-cell rest-day">
+                            <div class="wg-day">S</div>
+                            <div class="wg-dot"></div>
+                        </div>
+                        <div class="wg-cell">
+                            <div class="wg-day">S</div>
+                            <div class="wg-dot"></div>
+                        </div>
+                    </div>
+
+                    <!-- Split tabs -->
+                    <div class="split-tabs">
+                        <div class="split-tab active" onclick="splitTab(this,'push')">PUSH — WED</div>
+                        <div class="split-tab" onclick="splitTab(this,'pull')">PULL — FRI</div>
+                        <div class="split-tab" onclick="splitTab(this,'legs')">LEGS — SUN</div>
+                    </div>
+
+                    <!-- Plan exercises -->
+                    <div class="plan-exercises" id="planExList">
+                        <!-- Loaded dynamically by splitTab() -->
+                    </div>
+                </div><!-- /sc1 -->
+
+                <!-- ══════════ SCREEN 2 — NUTRITION ══════════ -->
+                <div class="screen sc-nutr" id="sc2">
+                    <div class="nutr-hero">
+                        <div class="nutr-date">Wednesday, March 23</div>
+                        <div class="nutr-title">CALORIE <span>TRACKER</span></div>
+
+                        <div class="big-calorie-display">
+                            <div class="bc-consumed">1740</div>
+                            <div class="bc-sep">/</div>
+                            <div class="bc-goal">2900</div>
+                            <div class="bc-unit">kcal</div>
+                        </div>
+                        <div class="calorie-progress">
+                            <div class="calorie-fill"></div>
+                        </div>
+                        <div class="calorie-remaining"><span>1160 kcal</span> remaining today</div>
+
+                        <div class="macro-summary">
+                            <div class="ms-card">
+                                <div class="ms-val">128g</div>
+                                <div class="ms-lbl">Protein</div>
+                                <div class="ms-prog">
+                                    <div class="ms-fill" style="width:71%;background:var(--cyan)"></div>
+                                </div>
+                            </div>
+                            <div class="ms-card">
+                                <div class="ms-val">195g</div>
+                                <div class="ms-lbl">Carbs</div>
+                                <div class="ms-prog">
+                                    <div class="ms-fill" style="width:70%;background:var(--amber)"></div>
+                                </div>
+                            </div>
+                            <div class="ms-card">
+                                <div class="ms-val">48g</div>
+                                <div class="ms-lbl">Fats</div>
+                                <div class="ms-prog">
+                                    <div class="ms-fill" style="width:69%;background:var(--violet)"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="add-meal-btn" onclick="openModal()">
+                        + ADD MEAL / SNACK
+                    </button>
+
+                    <div class="meal-section-title">BREAKFAST</div>
+                    <div class="meal-cards">
+                        <div class="meal-card">
+                            <div class="mc-left">
+                                <div class="mc-name">4 Whole Eggs + Bread</div>
+                                <div class="mc-macros">
+                                    <div>P: <span>28g</span></div>
+                                    <div>C: <span>32g</span></div>
+                                    <div>F: <span>20g</span></div>
+                                </div>
+                            </div>
+                            <div class="mc-kcal">420<div class="mc-kcal-unit">kcal</div>
+                            </div>
+                            <div class="mc-delete" onclick="deleteMeal(event,this)"><svg viewBox="0 0 24 24"
+                                    stroke-width="2" stroke-linecap="round">
+                                    <path d="M18 6L6 18M6 6l12 12" />
+                                </svg></div>
+                        </div>
+                    </div>
+
+                    <div class="meal-section-title" style="margin-top:8px">LUNCH</div>
+                    <div class="meal-cards">
+                        <div class="meal-card">
+                            <div class="mc-left">
+                                <div class="mc-name">Chicken Rice Bowl</div>
+                                <div class="mc-macros">
+                                    <div>P: <span>52g</span></div>
+                                    <div>C: <span>85g</span></div>
+                                    <div>F: <span>12g</span></div>
+                                </div>
+                            </div>
+                            <div class="mc-kcal">660<div class="mc-kcal-unit">kcal</div>
+                            </div>
+                            <div class="mc-delete" onclick="deleteMeal(event,this)"><svg viewBox="0 0 24 24"
+                                    stroke-width="2" stroke-linecap="round">
+                                    <path d="M18 6L6 18M6 6l12 12" />
+                                </svg></div>
+                        </div>
+                        <div class="meal-card">
+                            <div class="mc-left">
+                                <div class="mc-name">Whey Protein Shake</div>
+                                <div class="mc-macros">
+                                    <div>P: <span>25g</span></div>
+                                    <div>C: <span>8g</span></div>
+                                    <div>F: <span>3g</span></div>
+                                </div>
+                            </div>
+                            <div class="mc-kcal">160<div class="mc-kcal-unit">kcal</div>
+                            </div>
+                            <div class="mc-delete" onclick="deleteMeal(event,this)"><svg viewBox="0 0 24 24"
+                                    stroke-width="2" stroke-linecap="round">
+                                    <path d="M18 6L6 18M6 6l12 12" />
+                                </svg></div>
+                        </div>
+                    </div>
+
+                    <div class="meal-section-title" style="margin-top:8px">PRE-WORKOUT SNACK</div>
+                    <div class="meal-cards">
+                        <div class="meal-card">
+                            <div class="mc-left">
+                                <div class="mc-name">Banana + PB</div>
+                                <div class="mc-macros">
+                                    <div>P: <span>8g</span></div>
+                                    <div>C: <span>38g</span></div>
+                                    <div>F: <span>8g</span></div>
+                                </div>
+                            </div>
+                            <div class="mc-kcal">250<div class="mc-kcal-unit">kcal</div>
+                            </div>
+                            <div class="mc-delete" onclick="deleteMeal(event,this)"><svg viewBox="0 0 24 24"
+                                    stroke-width="2" stroke-linecap="round">
+                                    <path d="M18 6L6 18M6 6l12 12" />
+                                </svg></div>
+                        </div>
+                    </div>
+
+                    <div style="height:20px"></div>
+                </div><!-- /sc2 -->
+
+                <!-- ══════════ SCREEN 3 — RUN MAP ══════════ -->
+                <div class="screen sc-map" id="sc3" style="padding:0 12px 90px">
+
+                    <div class="run-header"
+                        style="display:flex; justify-content:space-between; align-items:center; padding:16px 4px 10px;">
+                        <div>
+                            <div
+                                style="font-family:var(--BAR); font-size:22px; font-weight:900; letter-spacing:1px; line-height:1">
+                                TERRITORY RUN</div>
+                            <div style="font-size:11px; color:var(--text2); margin-top:2px">Capture zones & earn points
+                            </div>
+                        </div>
+                        <button class="map-toggle-btn" onclick="toggleMap()"
+                            style="background:var(--card); border:1px solid var(--border); color:var(--lime); padding:8px 14px; border-radius:10px; font-family:var(--BAR); font-weight:800; font-size:12px; cursor:pointer; display:flex; gap:6px; align-items:center">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <line x1="1" y1="1" x2="23" y2="23"></line>
+                                <path d="M9 22H3v-6"></path>
+                                <path d="M15 2h6v6"></path>
+                            </svg> SHOW MAP
+                        </button>
+                    </div>
+
+                    <div class="map-wrap" id="mapWrap"
+                        style="display:none; border-radius:16px; margin-bottom:12px; min-height:240px; border:1px solid var(--border)">
+                        <canvas id="mapCanvas" style="touch-action:none;cursor:grab"></canvas>
+                        <div class="map-scan"></div>
+                        <div class="map-vignette"></div>
+                        <div class="map-hud-tl">
+                            <div class="hud-val" style="color:var(--lime)">4.5 km²</div>
+                            <div class="hud-lbl">Owned</div>
+                        </div>
+                        <div class="map-hud-tr">
+                            <div class="hud-val" style="color:var(--amber)">#16</div>
+                            <div class="hud-lbl">Global</div>
+                        </div>
+                    </div>
+
+                    <div class="live-bar">
+                        <div class="lb-cell">
+                            <div class="lb-v" style="color:var(--cyan)">2.4<span
+                                    style="font-size:9px;color:var(--text2)"> km</span></div>
+                            <div class="lb-l">Distance</div>
+                        </div>
+                        <div class="lb-cell">
+                            <div class="lb-v">18:42</div>
+                            <div class="lb-l">Duration</div>
+                        </div>
+                        <div class="lb-cell">
+                            <div class="lb-v" style="color:var(--amber)">185<span
+                                    style="font-size:9px;color:var(--text2)"> cal</span></div>
+                            <div class="lb-l">Burned</div>
+                        </div>
+                        <div class="lb-cell">
+                            <div class="lb-v" style="color:var(--lime)">5:12<span
+                                    style="font-size:9px;color:var(--text2)"> /km</span></div>
+                            <div class="lb-l">Pace</div>
+                        </div>
+                        <div class="lb-cell">
+                            <div class="lb-v" style="color:var(--rose)">+340</div>
+                            <div class="lb-l">Points</div>
+                        </div>
+                    </div>
+
+                    <div class="run-missions" style="padding:10px 12px 0">
+                        <div class="run-mission">
+                            <div class="rm-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"
+                                    stroke-linecap="round">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <polyline points="12 6 12 12 16 14" />
+                                </svg></div>
+                            <div class="rm-info">
+                                <div class="rm-title">Daily 5K Sprint</div>
+                                <div class="rm-prog">
+                                    <div class="rm-fill" style="width:48%"></div>
+                                </div>
+                            </div>
+                            <div class="rm-pts">+500</div>
+                        </div>
+                        <div class="run-mission">
+                            <div class="rm-icon" style="background:var(--cyan-dim)"><svg viewBox="0 0 24 24" fill="none"
+                                    stroke="var(--cyan)" stroke-width="2" stroke-linecap="round">
+                                    <polygon points="3 11 22 2 13 21 11 13 3 11" />
+                                </svg></div>
+                            <div class="rm-info">
+                                <div class="rm-title">Capture<br>3 Zones <span
+                                        style="color:var(--cyan);font-size:10px">2/3</span></div>
+                                <div class="rm-prog">
+                                    <div class="rm-fill" style="width:66%;background:var(--cyan)"></div>
+                                </div>
+                            </div>
+                            <div class="rm-pts" style="color:var(--cyan)">+300</div>
+                        </div>
+                    </div>
+
+                    <button class="run-start-btn idle" id="runBtn" onclick="toggleRun()" style="margin:16px 4px 0">
+                        <svg id="runIcon" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z" />
+                        </svg>
+                        <span id="runTxt">START RUN</span>
+                    </button>
+                </div><!-- /sc3 -->
+
+                <!-- ══════════ SCREEN 4 — ARENA ══════════ -->
+                <div class="screen sc-arena" id="sc4">
+                    <div class="hub-nav">
+                        <div class="hn-item active">ARENA</div>
+                        <div class="hn-item" onclick="go(5)">CLAN</div>
+                        <div class="hn-item" onclick="go(6)">RANKS</div>
+                        <div class="hn-item" onclick="go(7)">COMMS</div>
+                    </div>
+
+                    <div class="arena-hero">
+                        <div class="arena-label">Sport Mode</div>
+                        <div class="arena-title">TERRITORY <span>ARENA</span></div>
+                        <div class="arena-subtitle">Pick a sport — earn multiplied points on your runs</div>
+                    </div>
+
+                    <div class="sport-grid">
+                        <div class="sport-card sel" style="border-color:var(--lime)"
+                            onclick="pickSport(this,'Football','\u26bd','var(--lime)','#c8ff00','Field coverage = territory dominance','2×','var(--lime-dim)')">
+                            <div class="sc-shine" style="color:var(--lime)"></div>
+                            <div class="sc-icon">⚽</div>
+                            <div class="sc-name" style="color:var(--lime)">Football</div>
+                            <div class="sc-sub">Field capture mode</div>
+                            <div class="sc-mult" style="background:var(--lime-dim);color:var(--lime)">2× pts</div>
+                        </div>
+                        <div class="sport-card"
+                            onclick="pickSport(this,'Cricket','🏏','var(--amber)','#ffb300','Steps convert to runs on board','1.5×','var(--amber-dim)')">
+                            <div class="sc-shine" style="color:var(--amber)"></div>
+                            <div class="sc-icon">🏏</div>
+                            <div class="sc-name">Cricket</div>
+                            <div class="sc-sub">Steps equal runs</div>
+                            <div class="sc-mult" style="background:var(--amber-dim);color:var(--amber)">1.5× pts</div>
+                        </div>
+                        <div class="sport-card"
+                            onclick="pickSport(this,'Cycling','🚴','var(--cyan)','#00e5ff','Speed × distance = score multiplier','3×','var(--cyan-dim)')">
+                            <div class="sc-shine" style="color:var(--cyan)"></div>
+                            <div class="sc-icon">🚴</div>
+                            <div class="sc-name">Cycling</div>
+                            <div class="sc-sub">Distance scoring</div>
+                            <div class="sc-mult" style="background:var(--cyan-dim);color:var(--cyan)">3× pts</div>
+                        </div>
+                        <div class="sport-card"
+                            onclick="pickSport(this,'Sprint','⚡','var(--rose)','#ff3d71','Burst speed earns bonus territory','5×','var(--rose-dim)')">
+                            <div class="sc-shine" style="color:var(--rose)"></div>
+                            <div class="sc-icon">⚡</div>
+                            <div class="sc-name">Sprint</div>
+                            <div class="sc-sub">Burst bonus points</div>
+                            <div class="sc-mult" style="background:var(--rose-dim);color:var(--rose)">5× pts</div>
+                        </div>
+                    </div>
+
+                    <div class="sport-panel">
+                        <div class="sp-viz" id="spViz">
+                            <!-- Football viz by default -->
+                            <div class="ff" style="width:100%;height:100%">
+                                <div class="ff-field">
+                                    <div class="ff-mid"></div>
+                                    <div class="ff-circle"></div>
+                                    <div class="ff-cov"></div>
+                                    <div class="ff-player"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="sp-body">
+                            <div class="sp-title" id="spTitle" style="color:var(--lime)">Football Mode</div>
+                            <div class="sp-desc" id="spDesc">Field coverage = territory dominance</div>
+                            <div class="sp-stats">
+                                <div class="sp-stat">
+                                    <div class="sp-stat-v" style="color:var(--lime)">12:30</div>
+                                    <div class="sp-stat-l">Score</div>
+                                </div>
+                                <div class="sp-stat">
+                                    <div class="sp-stat-v">450 m²</div>
+                                    <div class="sp-stat-l">Covered</div>
+                                </div>
+                                <div class="sp-stat">
+                                    <div class="sp-stat-v">1.5 km</div>
+                                    <div class="sp-stat-l">Distance</div>
+                                </div>
+                                <div class="sp-stat">
+                                    <div class="sp-stat-v" style="color:var(--amber)">+120</div>
+                                    <div class="sp-stat-l">Points</div>
+                                </div>
+                            </div>
+                            <button class="sp-start-btn" id="spBtn" style="background:var(--lime);color:#000"
+                                onclick="go(3)">PLAY NOW — START RUN</button>
+                        </div>
+                    </div>
+                </div><!-- /sc4 -->
+
+                <!-- ══════════ SCREEN 5 — CLAN + EVENT HUB ══════════ -->
+                <div class="screen sc-clan" id="sc5">
+                    <div class="hub-nav">
+                        <div class="hn-item" onclick="go(4)">ARENA</div>
+                        <div class="hn-item active">CLAN</div>
+                        <div class="hn-item" onclick="go(6)">RANKS</div>
+                        <div class="hn-item" onclick="go(7)">COMMS</div>
+                    </div>
+
+                    <div class="clan-hero">
+                        <div class="clan-badge">
+                            <div class="cb-icon">🐺</div>
+                            <div class="cb-info">
+                                <div class="cb-name">IRON WOLVES</div>
+                                <div class="cb-stats">
+                                    <div>lvl <span>14</span></div>
+                                    <div>mems <span>42/50</span></div>
+                                    <div>rank <span>#8</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="war-banner">
+                            <div class="wb-left">
+                                <div class="wb-title">WEEKLY<br>TERRITORY WAR</div>
+                                <div class="wb-status">Matches found: 4 clans</div>
+                            </div>
+                            <button class="wb-btn">ENTER WAR</button>
+                        </div>
+                    </div>
+
+                    <div class="squad-room">
+                        <div class="sr-top">
+                            <div class="sr-title">Active Squad (2/4)</div>
+                            <div style="font-size:11px;color:var(--cyan);font-weight:600">1.5x XP Boost</div>
+                        </div>
+                        <div class="sr-mems">
+                            <div class="sm-ava filled">YOU</div>
+                            <div class="sm-ava filled" style="background:var(--violet);border-color:var(--violet)">SJ
+                            </div>
+                            <div class="sm-ava">+</div>
+                            <div class="sm-ava">+</div>
+                        </div>
+                        <button class="sr-invite">+ INVITE TO SQUAD</button>
+                    </div>
+
+                    <div class="section-hdr" style="padding:0 0 10px">
+                        <div class="sec-title">Event Calendar</div>
+                        <div class="sec-link">All Events ›</div>
+                    </div>
+
+                    <div class="event-cal">
+                        <div class="ec-item flash">
+                            <div class="ec-time">
+                                <div class="ec-time-v">NOW</div>
+                                <div class="ec-time-l">2:00h left</div>
+                            </div>
+                            <div class="ec-info">
+                                <div class="ec-title">⚡ Flash: Double XP</div>
+                                <div class="ec-sub">Global server-wide effect</div>
+                            </div>
+                        </div>
+                        <div class="ec-item">
+                            <div class="ec-time">
+                                <div class="ec-time-v">18:00</div>
+                                <div class="ec-time-l">Today</div>
+                            </div>
+                            <div class="ec-info">
+                                <div class="ec-title">Evening Blitz</div>
+                                <div class="ec-sub">Bonus territory multipliers</div>
+                            </div>
+                            <div class="ec-tag">+150 PTS</div>
+                        </div>
+                        <div class="ec-item">
+                            <div class="ec-time">
+                                <div class="ec-time-v">SUN</div>
+                                <div class="ec-time-l">14:00</div>
+                            </div>
+                            <div class="ec-info">
+                                <div class="ec-title">Clan Boss Raid</div>
+                                <div class="ec-sub">Mecha-Titan Event</div>
+                            </div>
+                            <div class="ec-tag" style="background:var(--violet-dim);color:var(--violet)">EPIC LOOT</div>
+                        </div>
+                    </div>
+                </div><!-- /sc5 -->
+
+                <!-- ══════════ SCREEN 6 — LEADERBOARDS ══════════ -->
+                <div class="screen sc-lb" id="sc6">
+                    <div class="hub-nav">
+                        <div class="hn-item" onclick="go(4)">ARENA</div>
+                        <div class="hn-item" onclick="go(5)">CLAN</div>
+                        <div class="hn-item active">RANKS</div>
+                        <div class="hn-item" onclick="go(7)">COMMS</div>
+                    </div>
+
+                    <div class="lb-hero">
+                        <div class="lb-title">GLOBAL <span>RANKS</span></div>
+                        <div class="arena-subtitle" style="margin-top:2px;margin-bottom:12px">Current Season Ends in 8
+                            Days</div>
+
+                        <div class="lb-filter-row">
+                            <div class="lb-filter active">Global</div>
+                            <div class="lb-filter">Local</div>
+                            <div class="lb-filter">Friends</div>
+                            <div class="lb-filter">Clans</div>
+                        </div>
+
+                        <!-- Podium -->
+                        <div class="podium">
+                            <!-- 2nd Place -->
+                            <div class="podium-col p2">
+                                <div class="p-ava">SJ</div>
+                                <div class="p-name">Sarah J.</div>
+                                <div class="p-km">284 km²</div>
+                                <div class="p-block">
+                                    <div class="p-num">2</div>
+                                </div>
+                            </div>
+                            <!-- 1st Place -->
+                            <div class="podium-col p1">
+                                <div class="p-ava" style="font-size:20px">♕</div>
+                                <div class="p-name" style="color:var(--amber);font-size:14px">Mike C.</div>
+                                <div class="p-km">342 km²</div>
+                                <div class="p-block">
+                                    <div class="p-num" style="color:rgba(245,200,66,0.8)">1</div>
+                                </div>
+                            </div>
+                            <!-- 3rd Place -->
+                            <div class="podium-col p3">
+                                <div class="p-ava">DT</div>
+                                <div class="p-name">Dave T.</div>
+                                <div class="p-km">210 km²</div>
+                                <div class="p-block">
+                                    <div class="p-num">3</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lb-list">
+                        <!-- Items 4 onwards -->
+                        <div class="lb-item">
+                            <div class="lb-rank">4</div>
+                            <div class="lb-ava" style="background:linear-gradient(135deg,#e91e63,#9c27b0)">K</div>
+                            <div class="lb-info">
+                                <div class="lb-name">Kobe_99</div>
+                                <div class="lb-sub">Lvl 45 Elite</div>
+                            </div>
+                            <div class="lb-score">195 km²</div>
+                        </div>
+                        <div class="lb-item">
+                            <div class="lb-rank">5</div>
+                            <div class="lb-ava" style="background:linear-gradient(135deg,#00bcd4,#3f51b5)">AL</div>
+                            <div class="lb-info">
+                                <div class="lb-name">Alex M.</div>
+                                <div class="lb-sub">Lvl 41 Runner</div>
+                            </div>
+                            <div class="lb-score">182 km²</div>
+                        </div>
+                        <div class="lb-item" style="border-color:var(--lime);background:rgba(200,255,0,0.03)">
+                            <div class="lb-rank" style="color:var(--lime)">6</div>
+                            <div class="lb-ava" style="background:var(--lime);color:#000">RK</div>
+                            <div class="lb-info">
+                                <div class="lb-name">You <span class="lb-you">STREAK +10%</span></div>
+                                <div class="lb-sub">Lvl 24 Striker</div>
+                            </div>
+                            <div class="lb-score">150 km²</div>
+                        </div>
+                        <div class="lb-item">
+                            <div class="lb-rank">7</div>
+                            <div class="lb-ava" style="background:linear-gradient(135deg,#ff9800,#f44336)">JD</div>
+                            <div class="lb-info">
+                                <div class="lb-name">John D.</div>
+                                <div class="lb-sub">Lvl 38</div>
+                            </div>
+                            <div class="lb-score">145 km²</div>
+                        </div>
+                    </div>
+                </div><!-- /sc6 -->
+
+                <!-- ══════════ SCREEN 7 — COMMUNITY CHAT ══════════ -->
+                <div class="screen sc-comms" id="sc7">
+                    <div class="hub-nav">
+                        <div class="hn-item" onclick="go(4)">ARENA</div>
+                        <div class="hn-item" onclick="go(5)">CLAN</div>
+                        <div class="hn-item" onclick="go(6)">RANKS</div>
+                        <div class="hn-item active">COMMS</div>
+                    </div>
+
+                    <div class="chat-wrapper" style="display:flex; flex-direction:column; height:calc(100vh - 280px);">
+                        <div class="chat-tabs" style="display:flex; gap:8px; margin-bottom:12px;">
+                            <div class="chat-tab active" id="tabGlobal" onclick="switchChat('global')"
+                                style="padding:6px 12px; background:var(--lime); color:#000; border:1px solid transparent; border-radius:8px; font-weight:800; font-family:var(--BAR); font-size:12px; cursor:pointer;">
+                                GLOBAL</div>
+                            <div class="chat-tab" id="tabClan" onclick="switchChat('clan')"
+                                style="padding:6px 12px; border:1px solid var(--border); background:transparent; color:var(--text2); border-radius:8px; font-weight:800; font-family:var(--BAR); font-size:12px; cursor:pointer;">
+                                CLAN</div>
+                            <div class="chat-tab" id="tabLocal" onclick="switchChat('local')"
+                                style="padding:6px 12px; border:1px solid var(--border); background:transparent; color:var(--text2); border-radius:8px; font-weight:800; font-family:var(--BAR); font-size:12px; cursor:pointer;">
+                                LOCAL</div>
+                        </div>
+
+                        <!-- GLOBAL CHAT -->
+                        <div class="chat-msgs" id="chatGlobal"
+                            style="flex:1; background:var(--card); border-radius:12px; padding:12px; overflow-y:auto; display:flex; flex-direction:column; gap:12px; border:1px solid var(--border);">
+                            <div class="chat-msg">
+                                <div style="font-size:11px; color:var(--lime); font-weight:700; margin-bottom:2px;">
+                                    Kobe_99 <span style="color:var(--text3); font-weight:500;">(Lvl 45)</span></div>
+                                <div style="font-size:13px; color:var(--text); line-height:1.4;">Anyone hitting the
+                                    downtown gym for the 2x XP event?</div>
+                            </div>
+                            <div class="chat-msg">
+                                <div style="font-size:11px; color:var(--cyan); font-weight:700; margin-bottom:2px;">Alex
+                                    M. <span style="color:var(--text3); font-weight:500;">(Lvl 41)</span></div>
+                                <div style="font-size:13px; color:var(--text); line-height:1.4;">I'll be there in 20
+                                    mins. Let's form a squad to capture the central zone.</div>
+                            </div>
+                            <div class="chat-msg system-msg" style="text-align:center; margin:8px 0;">
+                                <div
+                                    style="display:inline-block; padding:4px 10px; background:var(--rose-dim); color:var(--rose); font-size:10px; font-weight:700; border-radius:6px; letter-spacing:.5px;">
+                                    IRON WOLVES CAPTURED 'NORTH PARK'</div>
+                            </div>
+                            <div class="chat-msg">
+                                <div style="font-size:11px; color:var(--amber); font-weight:700; margin-bottom:2px;">
+                                    Sarah J. <span style="color:var(--text3); font-weight:500;">(Lvl 50)</span></div>
+                                <div style="font-size:13px; color:var(--text); line-height:1.4;">They are too fast! We
+                                    need more people to defend.</div>
+                            </div>
+                            <div class="chat-msg">
+                                <div style="font-size:11px; color:var(--lime); font-weight:700; margin-bottom:2px;">You
+                                    <span style="color:var(--text3); font-weight:500;">(Lvl 24)</span>
+                                </div>
+                                <div style="font-size:13px; color:var(--text); line-height:1.4;">On my way now. Squad
+                                    up.</div>
+                            </div>
+                        </div>
+
+                        <!-- CLAN CHAT -->
+                        <div class="chat-msgs" id="chatClan"
+                            style="flex:1; background:var(--card); border-radius:12px; padding:12px; overflow-y:auto; display:none; flex-direction:column; gap:12px; border:1px solid var(--border);">
+                            <div class="chat-msg system-msg" style="text-align:center; margin:8px 0;">
+                                <div style="display:inline-block; padding:4px 10px; background:var(--violet-dim); color:var(--violet); font-size:10px; font-weight:700; border-radius:6px; letter-spacing:.5px;">
+                                    CLAN WAR STARTS IN 12 HOURS</div>
+                            </div>
+                            <div class="chat-msg">
+                                <div style="font-size:11px; color:var(--violet); font-weight:700; margin-bottom:2px;">
+                                    WolfKing <span style="color:var(--text3); font-weight:500;">(Lvl 62)</span></div>
+                                <div style="font-size:13px; color:var(--text); line-height:1.4;">Make sure your energy is full before 8 PM tonight.</div>
+                            </div>
+                            <div class="chat-msg">
+                                <div style="font-size:11px; color:var(--text2); font-weight:700; margin-bottom:2px;">
+                                    Zack_Fit <span style="color:var(--text3); font-weight:500;">(Lvl 38)</span></div>
+                                <div style="font-size:13px; color:var(--text); line-height:1.4;">Will do! Just need 2 more zones to hit my daily cap.</div>
+                            </div>
+                            <div class="chat-msg">
+                                <div style="font-size:11px; color:var(--lime); font-weight:700; margin-bottom:2px;">You
+                                    <span style="color:var(--text3); font-weight:500;">(Lvl 24)</span>
+                                </div>
+                                <div style="font-size:13px; color:var(--text); line-height:1.4;">I'm ready. Let's dominate this week.</div>
+                            </div>
+                        </div>
+
+                        <!-- LOCAL CHAT -->
+                        <div class="chat-msgs" id="chatLocal"
+                            style="flex:1; background:var(--card); border-radius:12px; padding:12px; overflow-y:auto; display:none; flex-direction:column; gap:12px; border:1px solid var(--border);">
+                            <div class="chat-msg system-msg" style="text-align:center; margin:8px 0;">
+                                <div style="display:inline-block; padding:4px 10px; background:var(--cyan-dim); color:var(--cyan); font-size:10px; font-weight:700; border-radius:6px; letter-spacing:.5px;">
+                                    YOU JOINED THE 'DOWNTOWN' COMMS</div>
+                            </div>
+                            <div class="chat-msg">
+                                <div style="font-size:11px; color:var(--amber); font-weight:700; margin-bottom:2px;">
+                                    RunnerGirl <span style="color:var(--text3); font-weight:500;">(Lvl 19)</span></div>
+                                <div style="font-size:13px; color:var(--text); line-height:1.4;">Is it still raining in the park area?</div>
+                            </div>
+                            <div class="chat-msg">
+                                <div style="font-size:11px; color:var(--cyan); font-weight:700; margin-bottom:2px;">
+                                    Max_Lift <span style="color:var(--text3); font-weight:500;">(Lvl 44)</span></div>
+                                <div style="font-size:13px; color:var(--text); line-height:1.4;">Barely a drizzle. Perfect tempo weather actually.</div>
+                            </div>
+                        </div>
+
+                        <div class="chat-input" style="display:flex; gap:8px; margin-top:12px;">
+                            <input type="text" placeholder="Send a message..."
+                                style="flex:1; background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:10px 14px; color:var(--text); font-family:var(--DM); font-size:13px; outline:none;">
+                            <button
+                                style="background:var(--lime); border:none; border-radius:10px; width:44px; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" width="16"
+                                    height="16">
+                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div><!-- /sc7 -->
+
+            </div><!-- /screens -->
+
+            <!-- ─── BOTTOM NAV ─── -->
+            <nav class="bnav"
+                style="overflow-x:auto;scrollbar-width:none; position:absolute; bottom:0; width:100%; z-index:100; padding-bottom:12px; border-radius:0 0 40px 40px;">
+                <div class="bi active" data-target="0" onclick="go(0)" style="min-width:64px">
+                    <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7" rx="1" />
+                        <rect x="14" y="3" width="7" height="7" rx="1" />
+                        <rect x="3" y="14" width="7" height="7" rx="1" />
+                        <rect x="14" y="14" width="7" height="7" rx="1" />
+                    </svg>
+                    <div class="bi-lbl">Today</div>
+                </div>
+                <div class="bi" data-target="1" onclick="go(1)" style="min-width:64px">
+                    <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 4v16M18 4v16M6 12h12" />
+                        <circle cx="6" cy="4" r="1.5" />
+                        <circle cx="18" cy="4" r="1.5" />
+                        <circle cx="6" cy="20" r="1.5" />
+                        <circle cx="18" cy="20" r="1.5" />
+                    </svg>
+                    <div class="bi-lbl">Gym</div>
+                </div>
+                <div class="bi" data-target="2" onclick="go(2)" style="min-width:64px">
+                    <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
+                        <path d="M8 12h8M12 8v8" />
+                    </svg>
+                    <div class="bi-lbl">Diet</div>
+                </div>
+                <div class="bi" data-target="3" onclick="go(3)" style="min-width:64px">
+                    <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="3 11 22 2 13 21 11 13 3 11" />
+                    </svg>
+                    <div class="bi-lbl">Run</div>
+                </div>
+                <div class="bi" data-target="5" onclick="go(5)" style="min-width:64px">
+                    <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    <div class="bi-lbl">Hub</div>
+                </div>
+            </nav>
+
+            <!-- ─── LOG MEAL MODAL ─── -->
+            <div class="modal-overlay" id="mealModal" onclick="closeModalOutside(event)">
+                <div class="modal">
+                    <div class="modal-handle"></div>
+                    <div class="modal-title">Log a Meal</div>
+
+                    <div class="meal-presets">
+                        <div class="meal-preset" onclick="quickAdd('4 Eggs + Toast','420','28','32','20')">
+                            <div class="mp-icon">🥚</div>
+                            <div class="mp-name">4 Eggs + Toast</div>
+                            <div class="mp-kcal">420 kcal · 28g protein</div>
+                        </div>
+                        <div class="meal-preset" onclick="quickAdd('Chicken Rice Bowl','660','52','85','12')">
+                            <div class="mp-icon">🍚</div>
+                            <div class="mp-name">Chicken Rice Bowl</div>
+                            <div class="mp-kcal">660 kcal · 52g protein</div>
+                        </div>
+                        <div class="meal-preset" onclick="quickAdd('Whey Shake','160','25','8','3')">
+                            <div class="mp-icon">🥤</div>
+                            <div class="mp-name">Whey Shake</div>
+                            <div class="mp-kcal">160 kcal · 25g protein</div>
+                        </div>
+                        <div class="meal-preset" onclick="quickAdd('Dal Chawal','580','22','92','10')">
+                            <div class="mp-icon">🍛</div>
+                            <div class="mp-name">Dal Chawal</div>
+                            <div class="mp-kcal">580 kcal · 22g protein</div>
+                        </div>
+                        <div class="meal-preset" onclick="quickAdd('Banana + PB','250','8','38','8')">
+                            <div class="mp-icon">🍌</div>
+                            <div class="mp-name">Banana + PB</div>
+                            <div class="mp-kcal">250 kcal · 8g protein</div>
+                        </div>
+                        <div class="meal-preset" onclick="quickAdd('Oats + Milk','310','14','52','6')">
+                            <div class="mp-icon">🥣</div>
+                            <div class="mp-name">Oats + Milk</div>
+                            <div class="mp-kcal">310 kcal · 14g protein</div>
+                        </div>
+                    </div>
+
+                    <div class="modal-input-row">
+                        <input class="modal-input" id="customFood" placeholder="Custom food name…" style="flex:2">
+                        <input class="modal-input" id="customKcal" placeholder="kcal" type="number" style="flex:1">
+                    </div>
+                    <button class="modal-confirm" onclick="logCustom()">LOG MEAL</button>
+                </div>
+            </div>
+
+            <script>
+                // ── Navigation ──
+                function go(idx) {
+                    document.querySelectorAll('.tn').forEach((t, i) => t.classList.toggle('active', i === idx));
+                    document.querySelectorAll('.bi').forEach((b, i) => b.classList.toggle('active', i === idx));
+                    document.querySelectorAll('.screen').forEach((s, i) => {
+                        if (i === idx) { s.classList.add('active'); s.style.animation = 'none'; s.offsetHeight; s.style.animation = null; }
+                        else s.classList.remove('active');
+                    });
+                    if (idx === 3) resizeMap();
+                }
+
+                // ── Exercise expand/collapse ──
+                function toggleEx(card) {
+                    const exp = card.querySelector('.ex-expand');
+                    if (!exp) return;
+                    exp.classList.toggle('open');
+                }
+
+                function markDone(e, lbl) {
+                    e.stopPropagation();
+                    const card = lbl.closest('.ex-card');
+                    const cb = lbl.querySelector('input[type=checkbox]');
+                    if (cb.checked) {
+                        card.style.opacity = '0.5';
+                        lbl.innerHTML = '<input type="checkbox" checked> ✓ Completed';
+                        lbl.querySelector('input').addEventListener('change', () => { card.style.opacity = '1'; lbl.innerHTML = '<input type="checkbox"> Mark Complete'; });
+                    } else {
+                        card.style.opacity = '1';
+                    }
+                }
+
+                // ── Split tabs ──
+                const splitData = {
+                    push: ['Bench Press|Chest · Primary|Compound|4|8–10|80kg|90s',
+                        'Overhead Press|Shoulders · Primary|Compound|4|6–8|55kg|90s',
+                        'Incline DB Press|Upper Chest|Isolation|3|10–12|30kg|75s',
+                        'Lateral Raises|Side Delts|Isolation|4|15–20|12kg|60s',
+                        'Tricep Pushdowns|Triceps|Isolation|3|12–15|Cable|60s',
+                        'Cable Flyes|Chest Finisher|Isolation|3|12–15|Cable|45s'],
+                    pull: ['Deadlift|Back · Primary|Compound|4|5–6|100kg|120s',
+                        'Pull-Ups|Lats · Primary|Compound|4|6–10|BW|90s',
+                        'Barbell Row|Mid-Back|Compound|4|8–10|70kg|90s',
+                        'Face Pulls|Rear Delts|Isolation|3|15–20|Cable|60s',
+                        'Hammer Curls|Biceps|Isolation|3|12–15|18kg|60s',
+                        'Preacher Curls|Biceps Peak|Isolation|3|10–12|15kg|60s'],
+                    legs: ['Squat|Quads · Primary|Compound|4|6–8|100kg|120s',
+                        'Romanian DL|Hamstrings|Compound|4|8–10|80kg|90s',
+                        'Leg Press|Quads|Compound|3|12–15|160kg|90s',
+                        'Walking Lunges|Glutes|Compound|3|12ea|30kg|75s',
+                        'Leg Curls|Hamstrings|Isolation|3|12–15|Cable|60s',
+                        'Calf Raises|Calves|Isolation|4|20–25|60kg|45s']
+                };
+                const accentColors = ['var(--violet)', 'var(--cyan)', 'var(--rose)', 'var(--amber)', 'var(--lime)', 'var(--rose)'];
+
+                function splitTab(el, key) {
+                    document.querySelectorAll('.split-tab').forEach(t => t.classList.remove('active'));
+                    el.classList.add('active');
+                    const list = document.getElementById('planExList');
+                    list.innerHTML = '';
+                    splitData[key].forEach((row, i) => {
+                        const [name, muscle, type, sets, reps, load, rest] = row.split('|');
+                        const ac = accentColors[i];
+
+                        let stateClass = '';
+                        let headerRight = `<div class="ex-badge" style="background:${ac}22;color:${ac}">${type}</div>`;
+                        let metricsDisplay = 'flex';
+
+                        if (i === 0) {
+                            stateClass = 'collapsed completed';
+                            metricsDisplay = 'none';
+                            headerRight = `<div style="color:var(--lime); font-size:12px; font-weight:700;">✓ DONE</div>`;
+                        } else if (i === 1) {
+                            stateClass = 'active-ex';
+                            metricsDisplay = 'flex';
+                        } else {
+                            stateClass = 'collapsed pending';
+                            metricsDisplay = 'none';
+                        }
+
+                        list.innerHTML += `
+    <div class="plan-ex-card ${stateClass}" style="--accent:${ac}; transition: all 0.2s ease; cursor:pointer;" onclick="this.classList.toggle('collapsed'); const m = this.querySelector('.pec-metrics'); if(m) m.style.display = this.classList.contains('collapsed') ? 'none' : 'flex'; const mus = this.querySelector('.pec-muscle'); if(mus) mus.style.marginBottom = this.classList.contains('collapsed') ? '0' : '12px';">
+      <div class="pec-top">
+         <div class="pec-num" style="${i===0 ? 'color:var(--text3); text-decoration:line-through;' : ''}">0${i + 1} / 0${splitData[key].length}</div>
+         ${headerRight}
+      </div>
+      <div class="pec-name" style="${i===0 ? 'color:var(--text3);' : ''}">${name}</div>
+      <div class="pec-muscle" style="${(i!==1) ? 'margin-bottom:0;' : 'margin-bottom:12px;'}">${muscle}</div>
+      <div class="pec-metrics" style="display:${metricsDisplay};">
+        <div class="pec-m"><div class="pec-mv">${sets}</div><div class="pec-ml">Sets</div></div>
+        <div class="pec-m"><div class="pec-mv">${reps}</div><div class="pec-ml">Reps</div></div>
+        <div class="pec-m"><div class="pec-mv">${load}</div><div class="pec-ml">Load</div></div>
+        <div class="pec-m"><div class="pec-mv">${rest}</div><div class="pec-ml">Rest</div></div>
+      </div>
+      ${i===1 ? `<div class="pec-progress" style="margin-top:10px;"><div class="pec-prog-track"><div class="pec-prog-fill" style="background:${ac};width:0%"></div></div></div>` : ''}
+    </div>`;
+                    });
+                }
+
+                // ── Run toggle ──
+                let running = false;
+                function toggleRun() {
+                    running = !running;
+                    const btn = document.getElementById('runBtn');
+                    const icon = document.getElementById('runIcon');
+                    const txt = document.getElementById('runTxt');
+                    if (running) {
+                        btn.className = 'run-start-btn running';
+                        icon.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+                        txt.textContent = 'STOP RUN';
+                    } else {
+                        btn.className = 'run-start-btn idle';
+                        icon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+                        txt.textContent = 'START RUN';
+                    }
+                }
+
+                // ── Map toggle ──
+                function toggleMap() {
+                    const map = document.getElementById('mapWrap');
+                    const btn = document.querySelector('.map-toggle-btn');
+                    if (map.style.display === 'none') {
+                        map.style.display = 'block';
+                        btn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6"></path><path d="M9 21H3v-6"></path><path d="M21 3l-7 7"></path><path d="M3 21l7-7"></path></svg> HIDE MAP';
+                        resizeMap();
+                    } else {
+                        map.style.display = 'none';
+                        btn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"></line><path d="M9 22H3v-6"></path><path d="M15 2h6v6"></path></svg> SHOW MAP';
+                    }
+                }
+
+                // ── Sport picker ──
+                const sportVizHTML = {
+                    Football: `<div class="ff" style="width:100%;height:100%;padding:16px"><div class="ff-field"><div class="ff-mid"></div><div class="ff-circle"></div><div class="ff-cov"></div><div class="ff-player"></div></div></div>`,
+                    Cricket: `<div class="cf" style="width:100%;height:100%;padding:16px"><div class="cf-oval"><div class="cf-pitch"></div></div><div class="cf-score">RUNS: 47</div></div>`,
+                    Cycling: `<div class="cv" style="width:100%;height:100%"><div class="cv-speed"><div class="cv-speed-n">28.4</div><div class="cv-speed-l">KM / H</div></div><div class="cv-road"><div class="cv-road-line"></div></div></div>`,
+                    Sprint: `<div class="sv" style="width:100%;height:100%"><div class="sv-lanes"><div class="sv-lane"><div class="sv-runner"></div></div><div class="sv-lane"><div class="sv-runner"></div></div><div class="sv-lane"><div class="sv-runner"></div></div><div class="sv-lane"><div class="sv-runner"></div></div></div></div>`
+                };
+
+                function pickSport(el, name, icon, color, hex, desc, mult, dimColor) {
+                    document.querySelectorAll('.sport-card').forEach(c => {
+                        c.classList.remove('sel');
+                        c.style.borderColor = 'var(--border)';
+                        c.querySelector('.sc-name').style.color = 'var(--text)';
+                    });
+                    el.classList.add('sel');
+                    el.style.borderColor = color;
+                    el.querySelector('.sc-name').style.color = color;
+                    document.getElementById('spTitle').textContent = name + ' Mode';
+                    document.getElementById('spTitle').style.color = color;
+                    document.getElementById('spDesc').textContent = desc;
+                    document.getElementById('spBtn').style.background = hex;
+                    document.getElementById('spBtn').style.color = hex === '#ffb300' ? '#000' : (hex === '#c8ff00' ? '#000' : '#fff');
+                    document.getElementById('spViz').innerHTML = sportVizHTML[name] || sportVizHTML.Football;
+                }
+
+                // ── Meal Modal ──
+                function openModal() {
+                    document.getElementById('mealModal').classList.add('open');
+                }
+                function closeModalOutside(e) {
+                    if (e.target === document.getElementById('mealModal')) closeModal();
+                }
+                function closeModal() {
+                    document.getElementById('mealModal').classList.remove('open');
+                }
+
+                function quickAdd(name, kcal, p, c, f) {
+                    showToast(`✓ Added: ${name} — ${kcal} kcal`);
+                    closeModal();
+                }
+
+                function logCustom() {
+                    const food = document.getElementById('customFood').value.trim();
+                    const kcal = document.getElementById('customKcal').value.trim();
+                    if (!food) return;
+                    showToast(`✓ Logged: ${food}${kcal ? ' — ' + kcal + ' kcal' : ''}`);
+                    document.getElementById('customFood').value = '';
+                    document.getElementById('customKcal').value = '';
+                    closeModal();
+                }
+
+                function deleteMeal(e, btn) {
+                    e.stopPropagation();
+                    const card = btn.closest('.meal-card');
+                    card.style.opacity = '0'; card.style.transform = 'translateX(20px)';
+                    setTimeout(() => card.remove(), 250);
+                }
+
+                // ── Toast ──
+                function showToast(msg) {
+                    const t = document.createElement('div');
+                    t.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#c8ff00;color:#000;padding:10px 20px;border-radius:20px;font-family:"Barlow Condensed",sans-serif;font-weight:800;font-size:13px;letter-spacing:.8px;z-index:999;transition:opacity .3s;white-space:nowrap';
+                    t.textContent = msg;
+                    document.body.appendChild(t);
+                    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300) }, 2200);
+                }
+
+                // ── MAP CANVAS ──
+                let mapCanvas, ctx2, W2, H2;
+                let panX = 0, panY = 0, zoom = 400;
+                let dragging = false, lx = 0, ly = 0, tick = 0;
+                let zoomAnim = true, zoomT = 0, zoomStart = 120, zoomTarget = 420;
+
+                const PLAYER = { lat: 30.9, lng: 75.85 };
+
+                function latLngToXY(lat, lng) {
+                    const kmPer = zoom / 111;
+                    return {
+                        x: W2 / 2 + (lng - PLAYER.lng) * kmPer + panX,
+                        y: H2 / 2 - (lat - PLAYER.lat) * kmPer + panY
+                    };
+                }
+
+                function resizeMap() {
+                    const wrap = document.getElementById('mapWrap');
+                    if (!wrap) return;
+                    mapCanvas = document.getElementById('mapCanvas');
+                    if (!mapCanvas) return;
+                    W2 = wrap.clientWidth; H2 = wrap.clientHeight;
+                    mapCanvas.width = W2; mapCanvas.height = H2;
+                    ctx2 = mapCanvas.getContext('2d');
+                }
+
+                const territories = [
+                    { lat: 30.905, lng: 75.858, r: 0.8, color: 'rgba(200,255,0,0.18)', border: 'rgba(200,255,0,0.5)', owned: true },
+                    { lat: 30.895, lng: 75.842, r: 0.5, color: 'rgba(200,255,0,0.12)', border: 'rgba(200,255,0,0.35)', owned: true },
+                    { lat: 30.912, lng: 75.865, r: 0.6, color: 'rgba(0,229,255,0.12)', border: 'rgba(0,229,255,0.3)', owned: false },
+                    { lat: 30.888, lng: 75.855, r: 0.7, color: 'rgba(255,61,113,0.1)', border: 'rgba(255,61,113,0.25)', owned: false },
+                ];
+
+                const zoneMarkers = [
+                    { lat: 30.908, lng: 75.847, label: 'ZONE A', captured: true },
+                    { lat: 30.893, lng: 75.861, label: 'ZONE B', captured: true },
+                    { lat: 30.914, lng: 75.858, label: 'ZONE C', captured: false },
+                ];
+
+                function drawMap() {
+                    if (!ctx2) return;
+                    ctx2.clearRect(0, 0, W2, H2);
+
+                    // Dark grid
+                    ctx2.save();
+                    ctx2.globalAlpha = 0.12;
+                    ctx2.strokeStyle = '#4a5a7a'; ctx2.lineWidth = .5;
+                    const gridPx = zoom / 10;
+                    const ox = (W2 / 2 + panX) % gridPx;
+                    const oy = (H2 / 2 + panY) % gridPx;
+                    for (let x = ox - gridPx; x < W2 + gridPx; x += gridPx) { ctx2.beginPath(); ctx2.moveTo(x, 0); ctx2.lineTo(x, H2); ctx2.stroke(); }
+                    for (let y = oy - gridPx; y < H2 + gridPx; y += gridPx) { ctx2.beginPath(); ctx2.moveTo(0, y); ctx2.lineTo(W2, y); ctx2.stroke(); }
+                    ctx2.restore();
+
+                    // Territory zones
+                    territories.forEach(t => {
+                        const p = latLngToXY(t.lat, t.lng);
+                        const r = t.r * zoom / 111;
+                        ctx2.save();
+                        ctx2.beginPath(); ctx2.arc(p.x, p.y, r, 0, Math.PI * 2);
+                        ctx2.fillStyle = t.color; ctx2.fill();
+                        ctx2.strokeStyle = t.border; ctx2.lineWidth = 1.5;
+                        ctx2.setLineDash([4, 4]); ctx2.stroke(); ctx2.setLineDash([]);
+                        ctx2.restore();
+                    });
+
+                    // Player trail
+                    ctx2.save();
+                    const pp = latLngToXY(PLAYER.lat, PLAYER.lng);
+                    const trail = [{ lat: PLAYER.lat - 0.002, lng: PLAYER.lng - 0.003 }, { lat: PLAYER.lat - 0.001, lng: PLAYER.lng - 0.001 }, { lat: PLAYER.lat, lng: PLAYER.lng }];
+                    ctx2.beginPath();
+                    trail.forEach((t, i) => { const p = latLngToXY(t.lat, t.lng); i === 0 ? ctx2.moveTo(p.x, p.y) : ctx2.lineTo(p.x, p.y) });
+                    ctx2.strokeStyle = 'rgba(200,255,0,0.5)'; ctx2.lineWidth = 2; ctx2.lineCap = 'round'; ctx2.lineJoin = 'round'; ctx2.stroke();
+                    ctx2.restore();
+
+                    // Zone markers
+                    zoneMarkers.forEach(z => {
+                        const p = latLngToXY(z.lat, z.lng);
+                        ctx2.save();
+                        const col = z.captured ? '#c8ff00' : 'rgba(180,190,210,0.7)';
+                        ctx2.beginPath(); ctx2.arc(p.x, p.y, 5, 0, Math.PI * 2);
+                        ctx2.fillStyle = col; ctx2.fill();
+                        if (z.captured) { ctx2.shadowColor = '#c8ff00'; ctx2.shadowBlur = 10; ctx2.fill(); }
+                        if (zoom > 200) {
+                            ctx2.font = 'bold 9px "DM Sans",sans-serif';
+                            ctx2.fillStyle = col; ctx2.textAlign = 'center';
+                            ctx2.fillText(z.label, p.x, p.y - 10);
+                        }
+                        ctx2.restore();
+                    });
+
+                    // Player dot
+                    const pulse = 0.6 + 0.4 * Math.sin(tick * 3);
+                    ctx2.save();
+                    ctx2.beginPath(); ctx2.arc(pp.x, pp.y, 12 * pulse, 0, Math.PI * 2);
+                    ctx2.fillStyle = 'rgba(200,255,0,0.12)'; ctx2.fill();
+                    ctx2.beginPath(); ctx2.arc(pp.x, pp.y, 6, 0, Math.PI * 2);
+                    ctx2.fillStyle = '#c8ff00'; ctx2.fill();
+                    ctx2.shadowColor = '#c8ff00'; ctx2.shadowBlur = 16;
+                    ctx2.beginPath(); ctx2.arc(pp.x, pp.y, 3, 0, Math.PI * 2);
+                    ctx2.fillStyle = '#fff'; ctx2.fill();
+                    ctx2.restore();
+
+                    // Scale bar
+                    const kmPx = zoom / 111;
+                    const barKm = 1;
+                    const barPx = barKm * kmPx;
+                    const bx = W2 - 80, by = H2 - 16;
+                    ctx2.save(); ctx2.globalAlpha = 0.5;
+                    ctx2.strokeStyle = '#8899bb'; ctx2.lineWidth = 1.5;
+                    ctx2.beginPath(); ctx2.moveTo(bx, by); ctx2.lineTo(bx + barPx, by); ctx2.stroke();
+                    ctx2.beginPath(); ctx2.moveTo(bx, by - 3); ctx2.lineTo(bx, by + 3); ctx2.stroke();
+                    ctx2.beginPath(); ctx2.moveTo(bx + barPx, by - 3); ctx2.lineTo(bx + barPx, by + 3); ctx2.stroke();
+                    ctx2.font = '8px "DM Sans",sans-serif'; ctx2.fillStyle = '#8899bb'; ctx2.textAlign = 'center';
+                    ctx2.fillText('1 km', bx + barPx / 2, by - 5);
+                    ctx2.restore();
+
+                    // Compass
+                    const crx = W2 - 22, cry = 22;
+                    ctx2.save(); ctx2.globalAlpha = 0.55;
+                    ctx2.beginPath(); ctx2.moveTo(crx, cry - 10); ctx2.lineTo(crx - 4, cry + 4); ctx2.lineTo(crx, cry); ctx2.closePath();
+                    ctx2.fillStyle = '#c8ff00'; ctx2.fill();
+                    ctx2.beginPath(); ctx2.moveTo(crx, cry - 10); ctx2.lineTo(crx + 4, cry + 4); ctx2.lineTo(crx, cry); ctx2.closePath();
+                    ctx2.fillStyle = 'rgba(255,255,255,0.5)'; ctx2.fill();
+                    ctx2.font = 'bold 8px "DM Sans",sans-serif'; ctx2.fillStyle = '#fff'; ctx2.textAlign = 'center';
+                    ctx2.fillText('N', crx, cry - 12);
+                    ctx2.restore();
+                }
+
+                function mapLoop() {
+                    tick += 0.016;
+                    if (zoomAnim) {
+                        zoomT = Math.min(1, zoomT + 0.02);
+                        const e = 1 - Math.pow(1 - zoomT, 3);
+                        zoom = zoomStart + (zoomTarget - zoomStart) * e;
+                        if (zoomT >= 1) { zoomAnim = false; zoom = zoomTarget; }
+                    }
+                    drawMap();
+                    requestAnimationFrame(mapLoop);
+                }
+
+                // Map interaction
+                window.addEventListener('load', () => {
+                    resizeMap();
+                    mapLoop();
+
+                    const c = document.getElementById('mapCanvas');
+                    if (!c) return;
+                    c.addEventListener('mousedown', e => { dragging = true; lx = e.clientX; ly = e.clientY; c.style.cursor = 'grabbing' });
+                    window.addEventListener('mousemove', e => { if (!dragging) return; panX += e.clientX - lx; panY += e.clientY - ly; lx = e.clientX; ly = e.clientY });
+                    window.addEventListener('mouseup', () => { dragging = false; c.style.cursor = 'grab' });
+                    c.addEventListener('touchstart', e => { dragging = true; lx = e.touches[0].clientX; ly = e.touches[0].clientY }, { passive: true });
+                    c.addEventListener('touchmove', e => { if (!dragging) return; panX += e.touches[0].clientX - lx; panY += e.touches[0].clientY - ly; lx = e.touches[0].clientX; ly = e.touches[0].clientY }, { passive: true });
+                    c.addEventListener('touchend', () => { dragging = false });
+                    c.addEventListener('wheel', e => { e.preventDefault(); zoom = Math.max(100, Math.min(15000, zoom * (e.deltaY < 0 ? 1.12 : 0.89))) }, { passive: false });
+
+                    let lastDist = 0;
+                    c.addEventListener('touchstart', e => { if (e.touches.length === 2) { const d = e.touches[0]; const d2 = e.touches[1]; lastDist = Math.hypot(d.clientX - d2.clientX, d.clientY - d2.clientY) } }, { passive: true });
+                    c.addEventListener('touchmove', e => { if (e.touches.length === 2) { const d = e.touches[0]; const d2 = e.touches[1]; const dist = Math.hypot(d.clientX - d2.clientX, d.clientY - d2.clientY); if (lastDist > 0) zoom = Math.max(100, Math.min(15000, zoom * dist / lastDist)); lastDist = dist } }, { passive: true });
+                });
+
+                window.addEventListener('resize', resizeMap);
+                // ── Auth toggle ──
+                function toggleAuth() {
+                    const lf = document.getElementById('loginForm');
+                    const sf = document.getElementById('signupForm');
+                    if (lf.style.display !== 'none') {
+                        lf.style.display = 'none';
+                        sf.style.display = 'block';
+                    } else {
+                        lf.style.display = 'block';
+                        sf.style.display = 'none';
+                    }
+                }
+
+                function doLogin() {
+                    const btn = document.getElementById('loginBtn');
+                    const btn2 = document.getElementById('signupBtn');
+                    if (btn) { btn.textContent = 'AUTHENTICATING...'; btn.style.transform = 'scale(0.98)'; }
+                    if (btn2) { btn2.textContent = 'AUTHENTICATING...'; btn2.style.transform = 'scale(0.98)'; }
+                    setTimeout(() => {
+                        document.getElementById('authScreen').style.opacity = '0';
+                        document.getElementById('authScreen').style.transform = 'scale(1.05)';
+                        setTimeout(() => {
+                            document.getElementById('authScreen').style.display = 'none';
+                            const app = document.getElementById('mainApp');
+                            app.style.display = 'flex';
+                            app.style.animation = 'fadeUp .4s ease-out';
+                            resizeMap();
+                        }, 400);
+                    }, 800);
+                }
+
+                // ── Comms switch ──
+                function switchChat(channel) {
+                    ['global','clan','local'].forEach(c => {
+                        let isA = (c === channel);
+                        let tab = document.getElementById('tab'+c.charAt(0).toUpperCase()+c.slice(1));
+                        let msg = document.getElementById('chat'+c.charAt(0).toUpperCase()+c.slice(1));
+                        
+                        if(isA) {
+                            tab.classList.add('active');
+                            tab.style.background = 'var(--lime)';
+                            tab.style.color = '#000';
+                            tab.style.borderColor = 'transparent';
+                            msg.style.display = 'flex';
+                        } else {
+                            tab.classList.remove('active');
+                            tab.style.background = 'transparent';
+                            tab.style.color = 'var(--text2)';
+                            tab.style.borderColor = 'var(--border)';
+                            msg.style.display = 'none';
+                        }
+                    });
+                }
+
+                // Initialize default split tab
+                document.addEventListener('DOMContentLoaded', () => {
+                    const defTab = document.querySelector('.split-tab.active');
+                    if (defTab) {
+                        const txt = defTab.textContent.toLowerCase();
+                        const key = txt.includes('push') ? 'push' : (txt.includes('pull') ? 'pull' : 'legs');
+                        splitTab(defTab, key);
+                    }
+                });
+
+            </script>
+
+        </div><!-- /main-app -->
+    </div><!-- /device-frame -->
+
+</body>
+
+</html>
