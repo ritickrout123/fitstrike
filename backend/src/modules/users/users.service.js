@@ -1,8 +1,8 @@
 import { HttpError } from '../../lib/http-error.js';
 
-export function createUserService(store) {
-  function getUserEntity(userId) {
-    const user = store.users.get(userId);
+export function createUserService({ User }) {
+  async function getUserEntity(userId) {
+    const user = await User.findOne({ id: userId });
 
     if (!user) {
       throw new HttpError(404, 'USER_NOT_FOUND', 'User could not be found.');
@@ -87,27 +87,28 @@ export function createUserService(store) {
         title: user.profile.title
       },
       stats: {
-        totalDistance: user.stats.totalDistance,
-        totalArea: user.stats.totalArea,
-        workoutsCompleted: user.stats.workoutsCompleted,
-        territoryCaptures: user.stats.territoryCaptures
+        totalDistance: user.totalDistance,
+        totalArea: user.totalArea,
+        workoutsCompleted: user.workoutsCompleted,
+        territoryCaptures: user.captureCount
       },
-      streak: user.today.streak
+      streak: user.currentStreak
     };
   }
 
-  function getPublicUser(userId) {
-    return toPublicUser(getUserEntity(userId));
+  async function getPublicUser(userId) {
+    return toPublicUser(await getUserEntity(userId));
   }
 
-  function getTodaySnapshot(userId) {
-    const today = getUserEntity(userId).today;
+  async function getTodaySnapshot(userId) {
+    const user = await getUserEntity(userId);
+    const today = user.today;
     const workout = summarizeWorkout(today.workout);
     const nutrition = summarizeNutrition(today.nutrition);
 
     return {
       date: today.date,
-      streak: today.streak,
+      streak: user.currentStreak,
       workout: {
         label: workout.label,
         focus: workout.focus,
@@ -131,12 +132,13 @@ export function createUserService(store) {
     };
   }
 
-  function getGymPlan(userId) {
-    return toGymPlan(getUserEntity(userId).today);
+  async function getGymPlan(userId) {
+    const user = await getUserEntity(userId);
+    return toGymPlan(user.today);
   }
 
-  function completeGymExercise(userId, exerciseId) {
-    const user = getUserEntity(userId);
+  async function completeGymExercise(userId, exerciseId) {
+    const user = await getUserEntity(userId);
     const exercise = user.today.workout.exercises.find((entry) => entry.id === exerciseId);
 
     if (!exercise) {
@@ -153,19 +155,22 @@ export function createUserService(store) {
 
     if (workout.isComplete && !wasWorkoutAlreadyComplete) {
       user.today.workout.completedAt = new Date().toISOString();
-      user.stats.workoutsCompleted += 1;
+      user.workoutsCompleted += 1;
     }
+
+    await user.save();
 
     return {
       exerciseId,
       wasAlreadyCompleted: wasCompleted,
       workout,
-      workoutsCompleted: user.stats.workoutsCompleted
+      workoutsCompleted: user.workoutsCompleted
     };
   }
 
-  function getNutrition(userId) {
-    return toNutritionSnapshot(getUserEntity(userId).today);
+  async function getNutrition(userId) {
+    const user = await getUserEntity(userId);
+    return toNutritionSnapshot(user.today);
   }
 
   function parseInteger(value, { field, min = 0 } = {}) {
@@ -182,8 +187,8 @@ export function createUserService(store) {
     return parsed;
   }
 
-  function addNutritionMeal(userId, input = {}) {
-    const user = getUserEntity(userId);
+  async function addNutritionMeal(userId, input = {}) {
+    const user = await getUserEntity(userId);
     const name = String(input.name ?? '').trim();
     const category = String(input.category ?? 'Quick Add').trim() || 'Quick Add';
 
@@ -203,6 +208,7 @@ export function createUserService(store) {
     };
 
     user.today.nutrition.meals.push(meal);
+    await user.save();
 
     return {
       meal: { ...meal },

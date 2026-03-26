@@ -1,23 +1,19 @@
-import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
+import { randomBytes } from 'node:crypto';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
-export function hashPassword(password) {
-  const salt = randomBytes(16).toString('hex');
-  const derivedKey = scryptSync(password, salt, 64).toString('hex');
-  return `${salt}:${derivedKey}`;
+export async function hashPassword(password) {
+  return await bcrypt.hash(password, 12);
 }
 
-export function verifyPassword(password, passwordHash) {
-  const [salt, storedHash] = passwordHash.split(':');
-  const derivedKey = scryptSync(password, salt, 64);
-  const storedBuffer = Buffer.from(storedHash, 'hex');
-
-  if (derivedKey.length !== storedBuffer.length) {
-    return false;
-  }
-
-  return timingSafeEqual(derivedKey, storedBuffer);
+export async function verifyPassword(password, passwordHash) {
+  return await bcrypt.compare(password, passwordHash);
 }
 
 export function createSessionToken() {
   return randomBytes(32).toString('hex');
+}
+
+export function generateJwt(userId, secret, expires) {
+  return jwt.sign({ userId }, secret, { expiresIn: expires });
 }

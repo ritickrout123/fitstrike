@@ -1,27 +1,27 @@
-export function createSocialService(store) {
-  function getChannelEntity(channelId) {
-    return store.channels.find((channel) => channel.id === channelId) ?? null;
+export function createSocialService({ User, Clan, Channel, Message, redisService }) {
+  async function getChannelEntity(channelId) {
+    return await Channel.findOne({ id: channelId }).lean();
   }
 
-  function toClientMessage(message, currentUserId) {
+  async function toClientMessage(message, currentUserId) {
     if (message.type === 'system') {
       return {
         id: message.id,
         type: message.type,
         content: message.content,
-        timestamp: message.timestamp,
+        timestamp: message.createdAt,
         sender: null,
         isCurrentUser: false
       };
     }
 
-    const sender = store.users.get(message.senderId);
+    const sender = await User.findOne({ id: message.senderId }).lean();
 
     return {
       id: message.id,
       type: message.type,
       content: message.content,
-      timestamp: message.timestamp,
+      timestamp: message.createdAt,
       sender: sender == null
           ? null
           : {
@@ -34,72 +34,106 @@ export function createSocialService(store) {
     };
   }
 
-  function getCurrentClan(userId) {
-    const user = store.users.get(userId);
-    const clanId = user?.social?.clanId;
+  async function getCurrentClan(userId) {
+    const user = await User.findOne({ id: userId }).lean();
+    const clanId = user?.clanId;
 
     if (!clanId) {
       return null;
     }
 
-    const clan = store.clans.get(clanId);
+    const clan = await Clan.findOne({ id: clanId }).lean();
 
     if (!clan) {
       return null;
     }
+
+    const roster = await Promise.all(
+      clan.memberIds.map(async (memberId) => {
+        const rosterUser = await User.findOne({ id: memberId }).lean();
+        // Mocking roles/contribution as they aren't fully in the DB yet
+        return {
+          userId: memberId,
+          displayName: rosterUser?.profile.displayName ?? 'Unknown',
+          level: rosterUser?.profile.level ?? 0,
+          title: rosterUser?.profile.title ?? '',
+          role: rosterUser?.clanRole ?? 'member',
+          contribution: '+0', // This would come from a contribution log in prod
+          status: 'Offline'
+        };
+      })
+    );
 
     return {
       id: clan.id,
       name: clan.name,
       tag: clan.tag,
       level: clan.level,
-      rank: clan.rank,
+      rank: 0, // Would be calculated from Redis
       memberCount: clan.memberCount,
       maxMembers: clan.maxMembers,
-      war: clan.war,
-      roster: clan.roster.map((member) => {
-        const rosterUser = store.users.get(member.userId);
-
-        return {
-          userId: member.userId,
-          displayName: rosterUser?.profile.displayName ?? 'Unknown',
-          level: rosterUser?.profile.level ?? 0,
-          title: rosterUser?.profile.title ?? '',
-          role: member.role,
-          contribution: member.contribution,
-          status: member.status
-        };
-      })
+      war: {
+        title: 'Weekly Territory War',
+        status: 'Upcoming',
+        xpBoost: '1.0x'
+      },
+      roster
     };
   }
 
-  function getChannels() {
+  async function getChannels() {
+    const channels = await Channel.find({}).lean();
     return {
-      channels: store.channels.map((channel) => ({
+      channels: channels.map((channel) => ({
         ...channel
       }))
     };
   }
 
-  function getChannelMessages(userId, channelId) {
-    const channel = getChannelEntity(channelId);
+  async function getChannelMessages(userId, channelId) {
+    const channel = await getChannelEntity(channelId);
 
     if (!channel) {
       throw new Error(`Unknown channel: ${channelId}`);
     }
 
-    const messages = store.channelMessages.get(channelId) ?? [];
+    // Try Redis cache first
+    const cacheKey = `chat:${channelId}:recent`;
+    const cached = await redisService.redis.get(cacheKey);
+    let messages;
+
+    if (cached) {
+      messages = JSON.parse(cached);
+    } else {
+      // Fallback to MongoDB (last 200)
+      messages = await Message.find({ channelId })
+        .sort({ createdAt: -1 })
+        .limit(200)
+        .lean();
+      
+      // Cache last 50 in Redis
+      if (messages.length > 0) {
+        await redisService.redis.set(
+          cacheKey, 
+          JSON.stringify(messages.slice(0, 50)),
+          'EX', 3600
+        );
+      }
+    }
+
+    // toClientMessage handles formatting and sender hydration
+    const clientMessages = await Promise.all(
+      messages.map((message) => toClientMessage(message, userId))
+    );
 
     return {
-      channel: {
-        ...channel
-      },
-      messages: messages.map((message) => toClientMessage(message, userId))
+      channel,
+      messages: clientMessages.reverse() // Chronological order
     };
   }
 
-  function sendMessage(userId, channelId, content, type = 'text') {
-    const channel = getChannelEntity(channelId);
+  async function sendMessage(userId, channelId, content, type = 'text') {
+    const channel = await Channel.findOne({ id: channelId });
 
     if (!channel) {
       throw new Error(`Unknown channel: ${channelId}`);
@@ -109,23 +143,31 @@ export function createSocialService(store) {
       throw new Error('Message content is required.');
     }
 
-    const entry = {
+    const message = new Message({
       id: `msg_${Date.now()}`,
+      channelId,
       senderId: userId,
       type,
-      content: content.trim(),
-      timestamp: new Date().toISOString()
-    };
+      content: content.trim()
+    });
 
-    const existingMessages = store.channelMessages.get(channelId) ?? [];
-    existingMessages.push(entry);
-    store.channelMessages.set(channelId, existingMessages);
+    await message.save();
 
-    channel.preview = entry.content;
+    // Update channel metadata
+    channel.preview = message.content;
     channel.unreadCount = 0;
+    await channel.save();
+
+    // Update Redis cache (keep last 50)
+    const cacheKey = `chat:${channelId}:recent`;
+    const cached = await redisService.redis.get(cacheKey);
+    let recent = cached ? JSON.parse(cached) : [];
+    recent.unshift(message.toObject());
+    recent = recent.slice(0, 50);
+    await redisService.redis.set(cacheKey, JSON.stringify(recent), 'EX', 3600);
 
     return {
-      message: toClientMessage(entry, userId)
+      message: await toClientMessage(message, userId)
     };
   }
 

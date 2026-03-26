@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto';
+import jwt from 'jsonwebtoken';
 
 import { HttpError } from '../../lib/http-error.js';
-import { createSessionToken, hashPassword, verifyPassword } from '../../lib/security.js';
 
-export function createAuthService(store, userService) {
+export function createAuthService({ User, redisService, userService, env }) {
   function createFoundationToday() {
     return {
       date: new Date().toISOString().slice(0, 10),
@@ -55,65 +55,46 @@ export function createAuthService(store, userService) {
     };
   }
 
-  function findUserByEmail(email) {
-    const normalizedEmail = email.trim().toLowerCase();
-    return [...store.users.values()].find((user) => user.email.toLowerCase() === normalizedEmail);
-  }
+  async function createSession(userId) {
+    const accessToken = jwt.sign({ userId }, env.jwtSecret, { expiresIn: '15m' });
+    const refreshToken = randomUUID();
 
-  function findUserByUsername(username) {
-    const normalizedUsername = username.trim().toLowerCase();
-    return [...store.users.values()].find(
-      (user) => user.username.toLowerCase() === normalizedUsername
-    );
-  }
-
-  function createSession(userId) {
-    const token = createSessionToken();
-    const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString();
-
-    store.sessions.set(token, {
-      token,
-      userId,
-      createdAt: new Date().toISOString(),
-      expiresAt
-    });
+    // Store access token in Redis (15 mins) and refresh token (7 days)
+    await redisService.saveAuthSession(userId, { accessToken }, 900);
+    await redisService.saveRefreshToken(userId, refreshToken, 604800);
 
     return {
-      token,
-      expiresAt
+      token: accessToken,
+      refreshToken,
+      expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString()
     };
   }
 
-  function getSessionByToken(token) {
-    if (!token) {
+  async function getSessionByToken(token) {
+    if (!token) return null;
+
+    try {
+      const decoded = jwt.verify(token, env.jwtSecret);
+      const session = await redisService.getAuthSession(decoded.userId);
+
+      if (!session || session.accessToken !== token) {
+        return null;
+      }
+
+      const user = await User.findOne({ id: decoded.userId }).lean();
+      if (!user) return null;
+
+      return {
+        token,
+        userId: user.id,
+        user: userService.toPublicUser(user)
+      };
+    } catch (err) {
       return null;
     }
-
-    const session = store.sessions.get(token);
-
-    if (!session) {
-      return null;
-    }
-
-    if (Date.parse(session.expiresAt) <= Date.now()) {
-      store.sessions.delete(token);
-      return null;
-    }
-
-    const user = store.users.get(session.userId);
-
-    if (!user) {
-      store.sessions.delete(token);
-      return null;
-    }
-
-    return {
-      ...session,
-      user: userService.toPublicUser(user)
-    };
   }
 
-  function getSessionFromHeader(headerValue) {
+  async function getSessionFromHeader(headerValue) {
     if (!headerValue || !headerValue.startsWith('Bearer ')) {
       return null;
     }
@@ -122,60 +103,54 @@ export function createAuthService(store, userService) {
     return getSessionByToken(token);
   }
 
-  function register({ username, email, password, displayName }) {
+  async function register({ username, email, password, displayName }) {
     if (!username || !email || !password) {
       throw new HttpError(400, 'AUTH_INVALID_PAYLOAD', 'Username, email, and password are required.');
     }
 
-    if (findUserByEmail(email)) {
+    const existingEmail = await User.findOne({ email: email.toLowerCase() });
+    if (existingEmail) {
       throw new HttpError(409, 'AUTH_EMAIL_EXISTS', 'An account with that email already exists.');
     }
 
-    if (findUserByUsername(username)) {
+    const existingUsername = await User.findOne({ username: username.toLowerCase() });
+    if (existingUsername) {
       throw new HttpError(409, 'AUTH_USERNAME_EXISTS', 'That username is already taken.');
     }
 
-    const userId = `user_${randomUUID()}`;
-    const user = {
-      id: userId,
+    const user = new User({
       username: username.trim(),
       email: email.trim().toLowerCase(),
-      passwordHash: hashPassword(password),
+      passwordHash: password, // Pre-save hook will hash it
       profile: {
         displayName: displayName?.trim() || username.trim(),
         level: 1,
         title: 'Rookie Striker'
       },
-      stats: {
-        totalDistance: 0,
-        totalArea: 0,
-        workoutsCompleted: 0,
-        territoryCaptures: 0
-      },
       today: createFoundationToday()
-    };
+    });
 
-    store.users.set(user.id, user);
+    await user.save();
 
     return {
-      session: createSession(user.id),
+      session: await createSession(user.id),
       user: userService.toPublicUser(user)
     };
   }
 
-  function login({ email, password }) {
+  async function login({ email, password }) {
     if (!email || !password) {
       throw new HttpError(400, 'AUTH_INVALID_PAYLOAD', 'Email and password are required.');
     }
 
-    const user = findUserByEmail(email);
+    const user = await User.findByEmail(email);
 
-    if (!user || !verifyPassword(password, user.passwordHash)) {
+    if (!user || !(await user.comparePassword(password))) {
       throw new HttpError(401, 'AUTH_INVALID_CREDENTIALS', 'Invalid email or password.');
     }
 
     return {
-      session: createSession(user.id),
+      session: await createSession(user.id),
       user: userService.toPublicUser(user)
     };
   }

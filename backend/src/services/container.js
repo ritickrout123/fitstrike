@@ -1,17 +1,80 @@
-import { createInMemoryStore } from '../data/in-memory-store.js';
+import User from '../models/user.model.js';
+import Clan from '../models/clan.model.js';
+import Territory from '../models/territory.model.js';
+import Session from '../models/session.model.js';
+import Mission from '../models/mission.model.js';
+import Event from '../models/event.model.js';
+import Message from '../models/message.model.js';
+import Channel from '../models/channel.model.js';
+
+import { RedisService } from './redis.service.js';
 import { createAuthService } from '../modules/auth/auth.service.js';
 import { createEventsService } from '../modules/events/events.service.js';
 import { createGameService } from '../modules/game/game.service.js';
 import { createSocialService } from '../modules/social/social.service.js';
 import { createUserService } from '../modules/users/users.service.js';
+import { createClanService } from '../modules/clan/clan.service.js';
+import { createSquadService } from '../modules/squad/squad.service.js';
+import { createMatchmakingService } from '../modules/matchmaking/matchmaking.service.js';
+import { createStreamingService } from '../modules/streaming/streaming.service.js';
 
-export function createServiceContainer(env) {
-  const store = createInMemoryStore();
-  const userService = createUserService(store);
-  const authService = createAuthService(store, userService);
-  const gameService = createGameService(store, userService);
-  const socialService = createSocialService(store);
-  const eventsService = createEventsService(store);
+export async function createServiceContainer(env, { redisClient, pgPool }) {
+  const redisService = new RedisService(redisClient);
+
+  const userService = createUserService({ 
+    User 
+  });
+  
+  const authService = createAuthService({ 
+    User, 
+    redisService, 
+    userService, 
+    env 
+  });
+
+  const clanService = createClanService({
+    Clan,
+    User,
+    pgPool,
+    redisService
+  });
+
+  const squadService = createSquadService({
+    User,
+    redisService,
+    env
+  });
+
+  const matchmakingService = createMatchmakingService({
+    redisService,
+    squadService,
+    env
+  });
+
+  const streamingService = await createStreamingService({
+    redisService,
+    env
+  });
+
+  const gameService = createGameService({ 
+    User, 
+    Session, 
+    pgPool, 
+    redisService, 
+    userService 
+  });
+
+  const socialService = createSocialService({ 
+    User, 
+    Clan, 
+    Channel, 
+    Message, 
+    redisService 
+  });
+
+  const eventsService = createEventsService({ 
+    Event 
+  });
 
   return {
     metadata: {
@@ -19,21 +82,32 @@ export function createServiceContainer(env) {
       version: '0.1.0',
       startedAt: new Date().toISOString()
     },
-    store,
     authService,
     eventsService,
     gameService,
     socialService,
     userService,
+    clanService,
+    squadService,
+    matchmakingService,
+    streamingService,
+    redisService,
+    models: {
+      User,
+      Clan,
+      Territory,
+      Session,
+      Mission,
+      Event,
+      Message,
+      Channel
+    },
     services: {
-      auth: { ready: true, notes: 'In-memory session auth is active for foundation development.' },
-      game: { ready: true, notes: 'In-memory territory, missions, and leaderboard services are active.' },
-      social: { ready: true, notes: 'In-memory clan and channel services are active.' },
-      events: { ready: true, notes: 'In-memory event listing and registration are active.' },
-      notifications: {
-        ready: false,
-        notes: 'Push, in-app, and alert fanout to be implemented.'
-      }
+      auth: { ready: true, notes: 'Production JWT + Redis session auth is active.' },
+      game: { ready: true, notes: 'PostGIS territories and Redis leaderboards are active.' },
+      social: { ready: true, notes: 'MongoDB chat and clan services are active.' },
+      events: { ready: true, notes: 'MongoDB event listing and registration are active.' },
+      notifications: { ready: false, notes: 'Push, in-app, and alert fanout to be implemented.' }
     }
   };
 }
