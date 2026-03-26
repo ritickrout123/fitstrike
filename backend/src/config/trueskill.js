@@ -1,4 +1,4 @@
-import { TrueSkill, Rating } from 'trueskill';
+import { TrueSkill, Rating } from 'ts-trueskill';
 
 // Faster convergence for fitness (fewer games to stabilize)
 export const ts = new TrueSkill({

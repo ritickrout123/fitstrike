@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: fitstrike-api
+    env: docker
+    region: oregon 
+    plan: starter # Mediasoup needs at least 512MB-1GB RAM
+    branch: main
+    dockerContext: ./backend
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: MONGO_URI
+        sync: false # Provide your Atlas URI in Render Dashboard
+      - key: REDIS_URI
+        sync: false # Provide your Redis Labs/ElastiCache URI
+      - key: POSTGIS_URI
+        sync: false # Provide your Neon/AWS RDS URI
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: APP_NAME
+        value: FitStrike API
+    healthCheckPath: /v1/health
