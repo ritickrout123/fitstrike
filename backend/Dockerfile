@@ -1,7 +1,10 @@
 # --- STAGE 1: BUILD ---
 FROM node:20-slim AS builder
 
-ARG CACHEBUST=1
+WORKDIR /app
+
+# Copy dependency manifests first (cache bust on any package change)
+COPY package*.json ./
 
 # Install build dependencies for mediasoup
 RUN apt-get update && apt-get install -y \
@@ -11,11 +14,6 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     libssl-dev \
     && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /app
-
-# Copy dependency manifests
-COPY package*.json ./
 
 # Install all dependencies (including dev) to build native modules
 RUN npm install
