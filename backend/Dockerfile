@@ -1,6 +1,8 @@
 # --- STAGE 1: BUILD ---
 FROM node:20-slim AS builder
 
+ARG CACHEBUST=1
+
 # Install build dependencies for mediasoup
 RUN apt-get update && apt-get install -y \
     python3 \
