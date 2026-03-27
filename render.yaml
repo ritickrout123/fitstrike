@@ -5,6 +5,7 @@ services:
     region: oregon 
     plan: starter # Mediasoup needs at least 512MB-1GB RAM
     branch: main
+    dockerContext: ./backend
     dockerfilePath: ./backend/Dockerfile
     envVars:
       - key: NODE_ENV
