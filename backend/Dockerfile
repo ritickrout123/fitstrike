@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copy dependency manifests
-COPY package.json package-lock.json ./
+COPY package*.json ./
 
 # Install all dependencies (including dev) to build native modules
 RUN npm ci
